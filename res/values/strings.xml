@@ -4,5 +4,6 @@
     <string name="CarbProc">% of Carbs</string>
     <string name="GrossWeigth">Weigth (gr.)</string>
     <string name="CarbUnits">Carb Units</string>
+    <string name="CalcField">Calc.Field</string>
 
 </resources>

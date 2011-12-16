@@ -4,4 +4,5 @@
     <string name="CarbProc">% Углеводов</string>
     <string name="GrossWeigth">Вес (гр.)</string>
     <string name="CarbUnits">Единицы</string>
+    <string name="CalcField">Вычисл.Поле</string>
 </resources>

@@ -3,6 +3,7 @@ package com.dnsalias.sanja.simplecarbocalc;
 import java.text.DecimalFormat;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +16,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class SimpleCarboCalcActivity extends Activity {
-
+	public static final String PREFS_NAME = "MyState";
 	public static final int pProcN= 0;
 	public static final int pTotalN= 1;
 	public static final int pCarbN= 2;
@@ -191,7 +192,22 @@ public class SimpleCarboCalcActivity extends Activity {
         mRadioButton[pTotalN]= (RadioButton) findViewById(R.id.radioButtonTotal);
         mRadioButton[pCarbN]= (RadioButton) findViewById(R.id.radioButtonCarb);
         
-
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        mSequence[0] = settings.getInt("Sequence0", 0);
+        mSequence[1] = settings.getInt("Sequence1", 1);
+        mSequence[2] = settings.getInt("Sequence2", 2);
+        if (mSequence[0] < 0 || mSequence[1] < 0 || mSequence[2] < 0 ||
+        		mSequence[0] > 2 || mSequence[1] > 2 || mSequence[2] > 2 ||
+        		mSequence[0] == mSequence[1] || mSequence[0] == mSequence[2] ||
+        		mSequence[1] == mSequence[2])
+        {
+        	for (int i= 0; i < 3; i++)
+        		mSequence[i]= i;
+        }
+        mText[pProcN].setText(settings.getString("Proc", "12"));
+        mText[pTotalN].setText(settings.getString("Total", "100"));
+        mText[pCarbN].setText(settings.getString("Carb", "1"));
+        
 		//mHeader.setText(String.valueOf(mSequence[0]*100+mSequence[1]*10+mSequence[2]));
         for(int i= 0; i < mText.length; i++)
         {
@@ -200,6 +216,22 @@ public class SimpleCarboCalcActivity extends Activity {
         	mRadioButton[i].setOnCheckedChangeListener(mRadioListener);
         }
         setRadio();
-        mText[pProcN].requestFocus();
+        mText[mSequence[0]].requestFocus();
     }
+    
+    protected void onStop(){
+        super.onStop();
+
+
+       SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+       SharedPreferences.Editor editor = settings.edit();
+       editor.putInt("Sequence0", mSequence[0]);
+       editor.putInt("Sequence1", mSequence[1]);
+       editor.putInt("Sequence2", mSequence[2]);
+       editor.putString("Proc", mText[pProcN].getText().toString());
+       editor.putString("Total", mText[pTotalN].getText().toString());
+       editor.putString("Carb", mText[pCarbN].getText().toString());
+       // Commit the edits!
+       editor.commit();
+     }
 }
