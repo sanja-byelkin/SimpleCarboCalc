@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, SimpleCarboCalcActivity!</string>
-    <string name="app_name">SimpleCarboCalc</string>
+    <string name="app_name">Simple Carbohydrates Calculator</string>
+    <string name="CarbProc">% of Carbs</string>
+    <string name="GrossWeigth">Weigth (gr.)</string>
+    <string name="CarbUnits">Carb Units</string>
 
 </resources>

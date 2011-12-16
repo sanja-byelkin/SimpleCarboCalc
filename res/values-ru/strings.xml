@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Простой Калькулятор Углеводов</string>
+    <string name="CarbProc">% Углеводов</string>
+    <string name="GrossWeigth">Вес (гр.)</string>
+    <string name="CarbUnits">Единицы</string>
+</resources>
