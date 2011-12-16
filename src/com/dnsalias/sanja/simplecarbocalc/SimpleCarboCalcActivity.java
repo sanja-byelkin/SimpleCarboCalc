@@ -1,7 +1,11 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.CompoundButton;
@@ -12,9 +16,9 @@ import android.widget.TextView;
 
 public class SimpleCarboCalcActivity extends Activity {
 
-	public static int pProcN= 0;
-	public static int pTotalN= 1;
-	public static int pCarbN= 2;
+	public static final int pProcN= 0;
+	public static final int pTotalN= 1;
+	public static final int pCarbN= 2;
 	
 	private TextView mHeader;
 	private EditText mText[]= new EditText[3];
@@ -45,13 +49,91 @@ public class SimpleCarboCalcActivity extends Activity {
 			int i= getElementIndex(v, mRadioButton);
 			
 			if (isChecked)
-			{
 				setCalculatorTo(i);
-				mHeader.setText("Focus");
-			}
-			else
-				mHeader.setText("No Focus");
 	    }
+	};
+	private Double checkNegative(Double val, EditText txt)
+	{
+		if (val < 0)
+		{
+			val= -val;
+			txt.setText(val.toString());
+		}
+		return val;
+	}	
+	
+	private Double getPositiveDoubleValue(EditText txt)
+	{
+		Double val;
+		try {
+			val= new Double(txt.getText().toString());
+			val= checkNegative(val, mText[pProcN]);
+		}
+		catch (NumberFormatException ex)
+		{
+			val= 0.0;
+		}
+		return val;
+	}
+	
+	private Double getProcent()
+	{
+		Double val= getPositiveDoubleValue(mText[pProcN]);
+		val= checkNegative(val, mText[pProcN]);
+		if (val > 100)
+		{
+		    val= 100.0;
+			mText[pProcN].setText("100");
+		}
+		val/= 100;
+		return val;
+	}
+	
+
+	
+	private TextWatcher mTextWatcher= new TextWatcher() {
+	   public void afterTextChanged(Editable s)
+	   {
+		   Double total;
+		   Double carb;
+		   Double proc;
+		   DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
+		   if (s == mText[mSequence[2]].getText())
+			   return; // Avoid infinite loop
+		   switch (mSequence[2])
+		   {
+		   case pProcN:
+			   total= getPositiveDoubleValue(mText[pTotalN]);
+			   carb= getPositiveDoubleValue(mText[pCarbN]);
+			   if (carb < 0.001)
+				   mText[pProcN].setText("0");
+			   else
+			   {
+				   carb*= 12;
+				   mText[pProcN].setText(twoDigitsFormat.format(new Double(carb * 100 / total)));
+			   }
+			   break;
+		   case pTotalN:
+			   proc= getProcent();
+			   if (proc < 0.00001)
+				   mText[pTotalN].setText(0);
+			   else
+			   {
+				   carb= getPositiveDoubleValue(mText[pCarbN]);
+				   carb*= 12;
+				   mText[pTotalN].setText(twoDigitsFormat.format(new Double(carb/proc)));
+			   }
+			   break;
+		   case pCarbN:
+			   proc= getProcent();
+			   total= getPositiveDoubleValue(mText[pTotalN]);
+			   mText[pCarbN].setText(twoDigitsFormat.format(new Double(total*proc/12)));
+			   break;
+		   }
+	
+	   }
+	   public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+	   public void onTextChanged(CharSequence s, int start, int before, int count) {}
 	};
 	
 	private void setRadio()
@@ -120,9 +202,10 @@ public class SimpleCarboCalcActivity extends Activity {
         for(int i= 0; i < mText.length; i++)
         {
         	mText[i].setOnFocusChangeListener(mTextListener);
+        	mText[i].addTextChangedListener(mTextWatcher);
         	mRadioButton[i].setOnCheckedChangeListener(mRadioListener);
         }
-        
         setRadio();
+        mText[pProcN].requestFocus();
     }
 }
