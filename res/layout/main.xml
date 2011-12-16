@@ -25,7 +25,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/CarbProc" />
+                android:text="@string/CarbProc"
+                android:focusable="true" />
 
             <EditText
                 android:id="@+id/editTextProc"
@@ -49,7 +50,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/GrossWeigth" />
+                android:text="@string/GrossWeigth"
+                android:focusable="true" />
 
             <EditText
                 android:id="@+id/editTextTotal"
@@ -70,7 +72,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/CarbUnits" />
+                android:text="@string/CarbUnits"
+                android:focusable="true" />
 
             <EditText
                 android:id="@+id/editTextCarb"

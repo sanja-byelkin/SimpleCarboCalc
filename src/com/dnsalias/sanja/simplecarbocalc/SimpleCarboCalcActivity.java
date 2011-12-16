@@ -89,8 +89,6 @@ public class SimpleCarboCalcActivity extends Activity {
 		return val;
 	}
 	
-
-	
 	private TextWatcher mTextWatcher= new TextWatcher() {
 	   public void afterTextChanged(Editable s)
 	   {
@@ -136,51 +134,47 @@ public class SimpleCarboCalcActivity extends Activity {
 	   public void onTextChanged(CharSequence s, int start, int before, int count) {}
 	};
 	
-	private void setRadio()
+	private boolean setRadio()
 	{
+		boolean changed= false;
 		for(int i= 0; i < mRadioButton.length; i++)
 			if (mRadioButton[i].isChecked() != (i == mSequence[2]))
+			{
 				mRadioButton[i].setChecked(i == mSequence[2]);
+				changed= true;
+			}
+		return changed;
 	}
 	
-	private void setFocusTo(int focus)
+	private boolean setFocusTo(int focus)
 	{
 		if (mSequence[0] != focus)
 		{
-			if (mSequence[1] == focus)
-			{
-				mSequence[1]= mSequence[0];
-				mSequence[0]= focus;
-			}
-			else
-			{
+			if (mSequence[1] != focus)
 				mSequence[2]= mSequence[1];
-				mSequence[1]= mSequence[0];
-				mSequence[0]= focus;
-			}
-		}
-		setRadio();
+			mSequence[1]= mSequence[0];
+			mSequence[0]= focus;
+			if (setRadio() && !mText[mSequence[0]].isFocused())
+				mText[mSequence[0]].requestFocus();
+			return true;
+	    }
+		return false;
 	}
 	
-	private void setCalculatorTo(int calc)
+	private boolean setCalculatorTo(int calc)
 	{
-		if (mSequence[2] != calc);
+		if (mSequence[2] != calc)
 		{
-			if (mSequence[1] == calc)
-			{
-				mSequence[1]= mSequence[2];
-				mSequence[2]= calc;
-			}
-			else
-			{
+			if (mSequence[1] != calc)
 				mSequence[0]= mSequence[1];
-				mSequence[1]= mSequence[2];
-				mSequence[2]= calc;
-			}
+			mSequence[1]= mSequence[2];
+			mSequence[2]= calc;
+		
+			if (setRadio() && !mText[mSequence[0]].isFocused())
+				mText[mSequence[0]].requestFocus();
+			return true;
 		}
-		if (!mText[mSequence[0]].isFocused())
-			mText[mSequence[0]].requestFocus();
-		setRadio();
+		return false;
 	}
 	
     /** Called when the activity is first created. */
