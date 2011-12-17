@@ -55,11 +55,8 @@ public class SimpleCarboCalcActivity extends Activity {
 	};
 	private Double checkNegative(Double val, EditText txt)
 	{
-		if (val < 0)
-		{
-			val= -val;
-			txt.setText(val.toString());
-		}
+		if (val.isNaN() || val < 0)
+			val= Double.NaN;
 		return val;
 	}	
 	
@@ -72,7 +69,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		catch (NumberFormatException ex)
 		{
-			val= 0.0;
+			val= Double.NaN;
 		}
 		return val;
 	}
@@ -81,13 +78,17 @@ public class SimpleCarboCalcActivity extends Activity {
 	{
 		Double val= getPositiveDoubleValue(mText[pProcN]);
 		val= checkNegative(val, mText[pProcN]);
-		if (val > 100)
-		{
-		    val= 100.0;
-			mText[pProcN].setText("100");
-		}
-		val/= 100;
+		if (val.isNaN() || val > 100.00)
+		    val= Double.NaN;
+		else
+			val/= 100;
 		return val;
+	}
+	
+	private void setToError(EditText txt)
+	{
+		if (txt.getText().toString().compareTo("#") != 0)
+			txt.setText("#");
 	}
 	
 	private TextWatcher mTextWatcher= new TextWatcher() {
@@ -104,8 +105,8 @@ public class SimpleCarboCalcActivity extends Activity {
 		   case pProcN:
 			   total= getPositiveDoubleValue(mText[pTotalN]);
 			   carb= getPositiveDoubleValue(mText[pCarbN]);
-			   if (carb < 0.001)
-				   mText[pProcN].setText("0");
+			   if (carb < 0.001 || total.isNaN() || carb.isNaN())
+				   setToError(mText[pProcN]);
 			   else
 			   {
 				   carb*= 12;
@@ -114,11 +115,11 @@ public class SimpleCarboCalcActivity extends Activity {
 			   break;
 		   case pTotalN:
 			   proc= getProcent();
-			   if (proc < 0.00001)
-				   mText[pTotalN].setText(0);
+			   carb= getPositiveDoubleValue(mText[pCarbN]);
+			   if (proc < 0.00001 || proc.isNaN() || carb.isNaN())
+				   setToError(mText[pTotalN]);
 			   else
 			   {
-				   carb= getPositiveDoubleValue(mText[pCarbN]);
 				   carb*= 12;
 				   mText[pTotalN].setText(twoDigitsFormat.format(new Double(carb/proc)));
 			   }
@@ -126,7 +127,10 @@ public class SimpleCarboCalcActivity extends Activity {
 		   case pCarbN:
 			   proc= getProcent();
 			   total= getPositiveDoubleValue(mText[pTotalN]);
-			   mText[pCarbN].setText(twoDigitsFormat.format(new Double(total*proc/12)));
+			   if (proc.isNaN() || total.isNaN())
+				   setToError(mText[pCarbN]);
+			   else
+				   mText[pCarbN].setText(twoDigitsFormat.format(new Double(total*proc/12)));
 			   break;
 		   }
 	
