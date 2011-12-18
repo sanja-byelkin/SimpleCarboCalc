@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Простой Калькулятор Углеводов</string>
+    <string name="app_ver">1.02</string>
     <string name="CarbProc">% Углеводов</string>
     <string name="GrossWeigth">Вес (гр.)</string>
     <string name="CalcField">Вычисл.Поле</string>
@@ -20,5 +21,5 @@
     </string-array>
     <string name="MenuSetup">Настройка...</string>
     <string name="MenuAbout">О Программе...</string>
-    <string name="About">Простой Калькулятор Углеводов: вычисляет один из его параметров по двум другим.</string>
+    <string name="About">вычисляет один из его параметров по двум другим.</string>
 </resources>

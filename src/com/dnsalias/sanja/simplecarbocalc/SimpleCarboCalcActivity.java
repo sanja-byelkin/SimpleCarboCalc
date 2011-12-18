@@ -441,8 +441,9 @@ public class SimpleCarboCalcActivity extends Activity {
             	startActivityForResult(intent, ACTIVITY_SETUP);
                 return true;
             case MENU_ABOUT:
+            	Resources res= getResources();
             	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            	builder.setMessage(R.string.About)
+             	builder.setMessage(String.format("%s (%s): %s", res.getString(R.string.app_name), res.getString(R.string.app_ver), res.getString(R.string.About)))
             	       .setCancelable(true)
             	       .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
             	           public void onClick(DialogInterface dialog, int id) {
