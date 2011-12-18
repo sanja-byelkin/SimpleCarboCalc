@@ -3,7 +3,22 @@
     <string name="app_name">Simple Carbohydrates Calculator</string>
     <string name="CarbProc">% of Carbs</string>
     <string name="GrossWeigth">Weigth (gr.)</string>
-    <string name="CarbUnits">Carb Units</string>
     <string name="CalcField">Calc.Field</string>
-
+    <string name="setup_name">Setup of Simple Carbohydrates Calculator</string>
+    <string name="CarbUnitsToShow">Units to show Carbohydrates amount</string>
+    <string name="OK">OK</string>
+    <string name="Cancel">Cancel</string>
+    <string-array name="UnitChoose">
+        <item >1gr.</item>
+        <item >Unit 10gr.</item>
+        <item >Unit 12gr.</item>
+    </string-array>
+    <string-array name="UnitName">
+        <item >Carb.,gr.</item>
+        <item >Carb.,Units(10)</item>
+        <item >Carb.,Units(12)</item>
+    </string-array>
+    <string name="MenuSetup">Setup...</string>
+    <string name="MenuAbout">About...</string>
+    <string name="About">Simple Carbohydrates Calculator: Calculates one of its three parametes by other two.</string>
 </resources>

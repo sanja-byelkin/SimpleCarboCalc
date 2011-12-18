@@ -4,7 +4,7 @@
     android:versionCode="2"
     android:versionName="1.01" >
 
-    <uses-sdk android:minSdkVersion="3" />
+    <uses-sdk android:minSdkVersion="4" />
 
     <application
         android:icon="@drawable/simplecarbocalc"
@@ -18,6 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="SimpleCarboCalcSetup"></activity>
     </application>
 
 </manifest>

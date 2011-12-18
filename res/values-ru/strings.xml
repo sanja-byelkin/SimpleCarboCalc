@@ -3,6 +3,22 @@
     <string name="app_name">Простой Калькулятор Углеводов</string>
     <string name="CarbProc">% Углеводов</string>
     <string name="GrossWeigth">Вес (гр.)</string>
-    <string name="CarbUnits">Единицы</string>
     <string name="CalcField">Вычисл.Поле</string>
+    <string name="setup_name">Настройки Простого Калькулятора Углеводов</string>
+    <string name="CarbUnitsToShow">Единицы для показа количества углеводов</string>
+    <string name="OK">OK</string>
+    <string name="Cancel">Отменить</string>
+    <string-array name="UnitChoose">
+        <item >1гр.</item>
+        <item >ХЕ 10гр.</item>
+        <item >ХЕ 12гр.</item>
+    </string-array>
+    <string-array name="UnitName">
+        <item >Углев.,гр</item>
+        <item >Углев.,ХЕ10</item>
+        <item >Углев.,ХЕ12</item>
+    </string-array>
+    <string name="MenuSetup">Настройка...</string>
+    <string name="MenuAbout">О Программе...</string>
+    <string name="About">Простой Калькулятор Углеводов: вычисляет один из его параметров по двум другим.</string>
 </resources>

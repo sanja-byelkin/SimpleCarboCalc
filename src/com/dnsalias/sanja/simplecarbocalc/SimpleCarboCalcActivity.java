@@ -3,38 +3,79 @@ package com.dnsalias.sanja.simplecarbocalc;
 import java.text.DecimalFormat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.TextView;
 
 /**
  * 
  * @author Oleksander "Sanja" Byelkin
  *
  * @brief Simple Carbohydrates calculator: calculate 1 of 3 parameters by other 2 (% of Carbohydrates, Total
- * 		  weight of the product, wiegth of carbohydrates in it in units (1 unit = 12gr)).
+ * 		  weight of the product, wiegth of carbohydrates in it in units (1 unit = 1, 10 or 12gr)).
  * 
  * @license GPL V2
  * 
  */
 
 public class SimpleCarboCalcActivity extends Activity {
+	/**
+	 * Name to save preferences of the application (application state)
+	 */
 	public static final String PREFS_NAME = "MyState";
+
+	/**
+	 * Constants to identify saved state
+	 */
+	public static final String STATE_UNIT= "Unit";
+	public static final String STATE_SEQ0= "Sequence0";
+	public static final String STATE_SEQ1= "Sequence1";
+	public static final String STATE_SEQ2= "Sequence1";
+	public static final String STATE_PROC= "Proc";
+	public static final String STATE_TOTAL= "Total";
+	public static final String STATE_CARB= "Carb";
 	
+	/**
+	 * Constant for Activity request code
+	 */
+	private static final int ACTIVITY_SETUP= 1;
+	
+	/**
+	 * Menu constants
+	 */
+	private static final int MENU_SETUP = Menu.FIRST + 1;
+    private static final int MENU_ABOUT = MENU_SETUP + 1;
+	
+	/**
+	 * Constants to identify configure options
+	 */
+	public static final String CONFIG_UNIT= "unit_conf";
+	
+
 	/**
 	 * Constants of the 3 calculated parameters
 	 */
-	public static final int pProcN= 0;  // % of Carbohydrates
-	public static final int pTotalN= 1; // Total weight of the product
-	public static final int pCarbN= 2;  // wiegth of carbohydrates
+	public static final int N_PROC= 0;  // % of Carbohydrates
+	public static final int N_TOTAL= 1; // Total weight of the product
+	public static final int N_CARB= 2;  // wiegth of carbohydrates
+	
+	public static final int UNIT_FACTOR[]= {1, 10, 12};
+	
+	private int mUnitSetup;
+	private boolean mIsSetupProcess= false;
 	
 	/**
 	 * Text fields
@@ -48,7 +89,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Sequence of the parameters in which they was touched
 	 * (first (index 0) parameter is in focus, last (index 2) parameter is calculating parameter
 	 */
-	private int mSequence[]= {pProcN, pTotalN, pCarbN};
+	private int mSequence[]= {N_PROC, N_TOTAL, N_CARB};
 
 	/**
 	 * Finds index of the View object in the given array
@@ -70,7 +111,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	private OnFocusChangeListener mTextListener = new OnFocusChangeListener() {
 		public void onFocusChange(View v, boolean hasFocus) {
 			int i= getElementIndex(v, mText);
-			if (hasFocus)
+			if (hasFocus && !mIsSetupProcess)
 			{
 				setFocusTo(i);
 			}
@@ -84,7 +125,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		public void onCheckedChanged(CompoundButton v, boolean isChecked) {
 			int i= getElementIndex(v, mRadioButton);
 			
-			if (isChecked)
+			if (isChecked && !mIsSetupProcess)
 				setCalculatorTo(i);
 	    }
 	};
@@ -126,7 +167,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private Double getProcent()
 	{
-		Double val= getPositiveDoubleValue(mText[pProcN]);
+		Double val= getPositiveDoubleValue(mText[N_PROC]);
 		val= checkNegative(val);
 		if (val.isNaN() || val > 100.00)
 		    val= Double.NaN;
@@ -155,39 +196,39 @@ public class SimpleCarboCalcActivity extends Activity {
 		   Double carb;
 		   Double proc;
 		   DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
-		   if (s == mText[mSequence[2]].getText())
-			   return; // Avoid infinite loop
+		   if (s == mText[mSequence[2]].getText() || mIsSetupProcess)
+			   return; // Avoid infinite loop or setup problems
 		   switch (mSequence[2])
 		   {
-		   case pProcN:
-			   total= getPositiveDoubleValue(mText[pTotalN]);
-			   carb= getPositiveDoubleValue(mText[pCarbN]);
+		   case N_PROC:
+			   total= getPositiveDoubleValue(mText[N_TOTAL]);
+			   carb= getPositiveDoubleValue(mText[N_CARB]);
 			   if (carb < 0.001 || total.isNaN() || carb.isNaN())
-				   setToError(mText[pProcN]);
+				   setToError(mText[N_PROC]);
 			   else
 			   {
-				   carb*= 12;
-				   mText[pProcN].setText(twoDigitsFormat.format(new Double(carb * 100 / total)));
+				   carb*= UNIT_FACTOR[mUnitSetup];
+				   mText[N_PROC].setText(twoDigitsFormat.format(new Double(carb * 100 / total)));
 			   }
 			   break;
-		   case pTotalN:
+		   case N_TOTAL:
 			   proc= getProcent();
-			   carb= getPositiveDoubleValue(mText[pCarbN]);
+			   carb= getPositiveDoubleValue(mText[N_CARB]);
 			   if (proc < 0.00001 || proc.isNaN() || carb.isNaN())
-				   setToError(mText[pTotalN]);
+				   setToError(mText[N_TOTAL]);
 			   else
 			   {
-				   carb*= 12;
-				   mText[pTotalN].setText(twoDigitsFormat.format(new Double(carb/proc)));
+				   carb*= UNIT_FACTOR[mUnitSetup];
+				   mText[N_TOTAL].setText(twoDigitsFormat.format(new Double(carb/proc)));
 			   }
 			   break;
-		   case pCarbN:
+		   case N_CARB:
 			   proc= getProcent();
-			   total= getPositiveDoubleValue(mText[pTotalN]);
+			   total= getPositiveDoubleValue(mText[N_TOTAL]);
 			   if (proc.isNaN() || total.isNaN())
-				   setToError(mText[pCarbN]);
+				   setToError(mText[N_CARB]);
 			   else
-				   mText[pCarbN].setText(twoDigitsFormat.format(new Double(total*proc/12)));
+				   mText[N_CARB].setText(twoDigitsFormat.format(new Double(total*proc/UNIT_FACTOR[mUnitSetup])));
 			   break;
 		   }
 	
@@ -253,7 +294,19 @@ public class SimpleCarboCalcActivity extends Activity {
 		return false;
 	}
 	
-    /** Called when the activity is first created. */
+	/**
+	 * Assigns correct carbohydrates unit text
+	 */
+	void setCarbUnitsName()
+	{
+		Resources res= getResources();
+		CharSequence names[]= res.getTextArray(R.array.UnitName);
+		mRadioButton[N_CARB].setText(names[mUnitSetup]);
+	}
+	
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -262,20 +315,20 @@ public class SimpleCarboCalcActivity extends Activity {
         /*
          * Find our fields
          */
-        mText[pProcN]= (EditText)findViewById(R.id.editTextProc);
-        mText[pTotalN]= (EditText)findViewById(R.id.editTextTotal);
-        mText[pCarbN]= (EditText)findViewById(R.id.editTextCarb);
-        mRadioButton[pProcN]= (RadioButton) findViewById(R.id.radioButtonProc);
-        mRadioButton[pTotalN]= (RadioButton) findViewById(R.id.radioButtonTotal);
-        mRadioButton[pCarbN]= (RadioButton) findViewById(R.id.radioButtonCarb);
+        mText[N_PROC]= (EditText)findViewById(R.id.editTextProc);
+        mText[N_TOTAL]= (EditText)findViewById(R.id.editTextTotal);
+        mText[N_CARB]= (EditText)findViewById(R.id.editTextCarb);
+        mRadioButton[N_PROC]= (RadioButton) findViewById(R.id.radioButtonProc);
+        mRadioButton[N_TOTAL]= (RadioButton) findViewById(R.id.radioButtonTotal);
+        mRadioButton[N_CARB]= (RadioButton) findViewById(R.id.radioButtonCarb);
         
         /*
          * Restore state of the application
          */
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        mSequence[0] = settings.getInt("Sequence0", 0);
-        mSequence[1] = settings.getInt("Sequence1", 1);
-        mSequence[2] = settings.getInt("Sequence2", 2);
+        mSequence[0] = settings.getInt(STATE_SEQ0, 0);
+        mSequence[1] = settings.getInt(STATE_SEQ1, 1);
+        mSequence[2] = settings.getInt(STATE_SEQ2, 2);
         if (mSequence[0] < 0 || mSequence[1] < 0 || mSequence[2] < 0 ||
         		mSequence[0] > 2 || mSequence[1] > 2 || mSequence[2] > 2 ||
         		mSequence[0] == mSequence[1] || mSequence[0] == mSequence[2] ||
@@ -284,9 +337,10 @@ public class SimpleCarboCalcActivity extends Activity {
         	for (int i= 0; i < 3; i++)
         		mSequence[i]= i;
         }
-        mText[pProcN].setText(settings.getString("Proc", "12"));
-        mText[pTotalN].setText(settings.getString("Total", "100"));
-        mText[pCarbN].setText(settings.getString("Carb", "1"));
+        mText[N_PROC].setText(settings.getString(STATE_PROC, "12"));
+        mText[N_TOTAL].setText(settings.getString(STATE_TOTAL, "100"));
+        mText[N_CARB].setText(settings.getString(STATE_CARB, "1"));
+        mUnitSetup= settings.getInt(STATE_UNIT, 2);
         
 		/*
 		 * Set listeners
@@ -300,26 +354,108 @@ public class SimpleCarboCalcActivity extends Activity {
         /*
          * Set initial state of focus and ratio buttons
          */
+        setCarbUnitsName();
         setRadio();
         mText[mSequence[0]].requestFocus();
     }
+
+    /**
+     * Process results of setup
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (intent != null)
+        {
+        	Bundle bundle= intent.getExtras();
+        	if (requestCode == ACTIVITY_SETUP && resultCode == RESULT_OK)
+        	{
+        		int old_unit= UNIT_FACTOR[mUnitSetup];
+        		int new_unit_idx= bundle.getInt(CONFIG_UNIT, -1);
+        		int new_unit= UNIT_FACTOR[new_unit_idx];
+        		if (new_unit != -1)
+        		{
+        			Double total= getPositiveDoubleValue(mText[N_CARB]);
+        			mUnitSetup= new_unit_idx;
+        			if (!total.isNaN())
+        			{
+        				DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
+        				mIsSetupProcess= true;
+        				mText[N_CARB].setText(twoDigitsFormat.format(new Double((total*old_unit)/new_unit)));
+        				mIsSetupProcess= false;
+        			}
+        			saveAppState(); // Save new unit (and everything else)
+        			setCarbUnitsName();
+        		}
+        	}
+        }
+    }
     
+    /*
+     * Store state of the application
+     */  
+    private void saveAppState()
+    {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(STATE_SEQ0, mSequence[0]);
+        editor.putInt(STATE_SEQ0, mSequence[1]);
+        editor.putInt(STATE_SEQ0, mSequence[2]);
+        editor.putString(STATE_PROC, mText[N_PROC].getText().toString());
+        editor.putString(STATE_TOTAL, mText[N_TOTAL].getText().toString());
+        editor.putString(STATE_CARB, mText[N_CARB].getText().toString());
+        editor.putInt(STATE_UNIT, mUnitSetup);
+        editor.commit(); 	
+    }
     
+    /**
+     * Save state on stopping the application and everything else
+     */
     protected void onStop(){
         super.onStop();
 
-       /*
-        * Store state of the application
-        */
-       SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-       SharedPreferences.Editor editor = settings.edit();
-       editor.putInt("Sequence0", mSequence[0]);
-       editor.putInt("Sequence1", mSequence[1]);
-       editor.putInt("Sequence2", mSequence[2]);
-       editor.putString("Proc", mText[pProcN].getText().toString());
-       editor.putString("Total", mText[pTotalN].getText().toString());
-       editor.putString("Carb", mText[pCarbN].getText().toString());
-       // Commit the edits!
-       editor.commit();
+        saveAppState();
      }
+    
+    /**
+     * Define menu
+     */
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu)
+    {
+    	menu.add(0, MENU_SETUP, 0, R.string.MenuSetup);
+    	menu.add(0, MENU_ABOUT, 0, R.string.MenuAbout);
+    	return true;
+    }
+    
+    /**
+     * Menu actions
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	Intent intent;
+        switch (item.getItemId()) {
+            case MENU_SETUP:
+            	intent = new Intent(this, SimpleCarboCalcSetup.class);
+            	intent.putExtra(CONFIG_UNIT, mUnitSetup);
+            	startActivityForResult(intent, ACTIVITY_SETUP);
+                return true;
+            case MENU_ABOUT:
+            	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            	builder.setMessage(R.string.About)
+            	       .setCancelable(true)
+            	       .setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+            	           public void onClick(DialogInterface dialog, int id) {
+            	                dialog.cancel();
+            	           }
+            	       });
+            	       ;
+            	AlertDialog alert = builder.create();
+            	alert.show();
+           
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
