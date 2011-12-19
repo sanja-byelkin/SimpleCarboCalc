@@ -1,6 +1,8 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -157,19 +159,22 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		catch (NumberFormatException ex)
 		{
-			/*
-			 * It could be mess with , and . in different locale setting => try to fix
-			 */
-			try {
-			  val= new Double(txt.getText().toString().replace(',', '.'));
-			  val= checkNegative(val);
-			}
-			catch (NumberFormatException ex2)
-			{
-				val= Double.NaN;
-			}
+			val= Double.NaN;
 		}
 		return val;
+	}
+	
+	/**
+	 * Sets EditText with Double value
+	 * @param txt - where to put the value
+	 * @param val - the value to be put
+	 */
+	private void setDoubleValue(EditText txt, Double val)
+	{
+		DecimalFormatSymbols df= new DecimalFormatSymbols();
+		df.setDecimalSeparator('.'); // Numeric keyboard has only point, so we should use it
+		DecimalFormat twoDigitsFormat = new DecimalFormat("#.##", df);
+		txt.setText(twoDigitsFormat.format(val));
 	}
 	
 	/**
@@ -206,7 +211,6 @@ public class SimpleCarboCalcActivity extends Activity {
 		   Double total;
 		   Double carb;
 		   Double proc;
-		   DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
 		   if (s == mText[mSequence[2]].getText() || mIsSetupProcess)
 			   return; // Avoid infinite loop or setup problems
 		   switch (mSequence[2])
@@ -219,7 +223,7 @@ public class SimpleCarboCalcActivity extends Activity {
 			   else
 			   {
 				   carb*= UNIT_FACTOR[mUnitSetup];
-				   mText[N_PROC].setText(twoDigitsFormat.format(new Double(carb * 100 / total)));
+				   setDoubleValue(mText[N_PROC], new Double(carb * 100 / total));
 			   }
 			   break;
 		   case N_TOTAL:
@@ -230,7 +234,7 @@ public class SimpleCarboCalcActivity extends Activity {
 			   else
 			   {
 				   carb*= UNIT_FACTOR[mUnitSetup];
-				   mText[N_TOTAL].setText(twoDigitsFormat.format(new Double(carb/proc)));
+				   setDoubleValue(mText[N_TOTAL], new Double(carb/proc));
 			   }
 			   break;
 		   case N_CARB:
@@ -239,7 +243,7 @@ public class SimpleCarboCalcActivity extends Activity {
 			   if (proc.isNaN() || total.isNaN())
 				   setToError(mText[N_CARB]);
 			   else
-				   mText[N_CARB].setText(twoDigitsFormat.format(new Double(total*proc/UNIT_FACTOR[mUnitSetup])));
+				   setDoubleValue(mText[N_CARB], new Double(total*proc/UNIT_FACTOR[mUnitSetup]));
 			   break;
 		   }
 	
@@ -393,9 +397,8 @@ public class SimpleCarboCalcActivity extends Activity {
         				mUnitSetup= new_unit_idx;
         				if (!carb.isNaN())
         				{
-        					DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
         					mIsSetupProcess= true;
-        					mText[N_CARB].setText(twoDigitsFormat.format(new Double((carb*old_unit)/new_unit)));
+        					setDoubleValue(mText[N_CARB], new Double((carb*old_unit)/new_unit));
         					mIsSetupProcess= false;
         				}
         				saveAppState(); // Save new unit (and everything else)
