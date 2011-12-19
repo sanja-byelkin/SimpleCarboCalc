@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   	<string name="app_name">Простий Калькулятор Вуглеводів</string>
+    <string name="CarbProc">% Вуглеводів</string>
+    <string name="GrossWeigth">Вага (гр.)</string>
+    <string name="CalcField">Вырахуване Поле</string>
+    <string name="setup_name">Налаштування Простого Калькулятора Вуглеводів</string>
+    <string name="CarbUnitsToShow">Одиниці для показу кількості вуглеводів</string>
+    <string name="OK">OK</string>
+    <string name="Cancel">Відмінити</string>
+    <string-array name="UnitChoose">
+        <item >1гр.</item>
+        <item >Хлібна Одиниця (ХО) 10гр.</item>
+        <item >Хлібна Одиниця (ХО) 12гр.</item>
+    </string-array>
+    <string-array name="UnitName">
+        <item >Вуглев.,гр</item>
+        <item >Вуглев.,ХО10</item>
+        <item >Вуглев.,ХО12</item>
+    </string-array>
+    <string name="MenuSetup">Налаштув-ня</string>
+    <string name="MenuAbout">О програмі</string>
+    <string name="About">вираховує один з йго параметрів згідно двох інших.</string>
+    
+</resources>

@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 /**
  * 
@@ -156,7 +157,17 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		catch (NumberFormatException ex)
 		{
-			val= Double.NaN;
+			/*
+			 * It could be mess with , and . in different locale setting => try to fix
+			 */
+			try {
+			  val= new Double(txt.getText().toString().replace(',', '.'));
+			  val= checkNegative(val);
+			}
+			catch (NumberFormatException ex2)
+			{
+				val= Double.NaN;
+			}
 		}
 		return val;
 	}
@@ -365,27 +376,31 @@ public class SimpleCarboCalcActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+
         if (intent != null)
         {
-        	Bundle bundle= intent.getExtras();
         	if (requestCode == ACTIVITY_SETUP && resultCode == RESULT_OK)
         	{
-        		int old_unit= UNIT_FACTOR[mUnitSetup];
+        		Bundle bundle= intent.getExtras();
         		int new_unit_idx= bundle.getInt(CONFIG_UNIT, -1);
-        		int new_unit= UNIT_FACTOR[new_unit_idx];
-        		if (new_unit != -1)
+        		if (new_unit_idx != mUnitSetup)
         		{
-        			Double total= getPositiveDoubleValue(mText[N_CARB]);
-        			mUnitSetup= new_unit_idx;
-        			if (!total.isNaN())
+        			int old_unit= UNIT_FACTOR[mUnitSetup];
+        			if (new_unit_idx != -1)
         			{
-        				DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
-        				mIsSetupProcess= true;
-        				mText[N_CARB].setText(twoDigitsFormat.format(new Double((total*old_unit)/new_unit)));
-        				mIsSetupProcess= false;
+        				int new_unit= UNIT_FACTOR[new_unit_idx];
+        				Double carb= getPositiveDoubleValue(mText[N_CARB]);
+        				mUnitSetup= new_unit_idx;
+        				if (!carb.isNaN())
+        				{
+        					DecimalFormat twoDigitsFormat = new DecimalFormat("#.##");
+        					mIsSetupProcess= true;
+        					mText[N_CARB].setText(twoDigitsFormat.format(new Double((carb*old_unit)/new_unit)));
+        					mIsSetupProcess= false;
+        				}
+        				saveAppState(); // Save new unit (and everything else)
+        				setCarbUnitsName();
         			}
-        			saveAppState(); // Save new unit (and everything else)
-        			setCarbUnitsName();
         		}
         	}
         }

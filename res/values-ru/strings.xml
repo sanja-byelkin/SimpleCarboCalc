@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Простой Калькулятор Углеводов</string>
-    <string name="app_ver">1.04</string>
     <string name="CarbProc">% Углеводов</string>
     <string name="GrossWeigth">Вес (гр.)</string>
     <string name="CalcField">Вычисл.Поле</string>
@@ -11,8 +10,8 @@
     <string name="Cancel">Отменить</string>
     <string-array name="UnitChoose">
         <item >1гр.</item>
-        <item >ХЕ 10гр.</item>
-        <item >ХЕ 12гр.</item>
+        <item >Хлебная Едненица (ХЕ) 10гр.</item>
+        <item >Хлебная Едненица (ХЕ) 12гр.</item>
     </string-array>
     <string-array name="UnitName">
         <item >Углев.,гр</item>
@@ -20,6 +19,6 @@
         <item >Углев.,ХЕ12</item>
     </string-array>
     <string name="MenuSetup">Настройка</string>
-    <string name="MenuAbout">О Программе</string>
+    <string name="MenuAbout">О программе</string>
     <string name="About">вычисляет один из его параметров по двум другим.</string>
 </resources>
