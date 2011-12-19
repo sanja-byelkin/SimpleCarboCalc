@@ -423,8 +423,8 @@ public class SimpleCarboCalcActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu (Menu menu)
     {
-    	menu.add(0, MENU_SETUP, 0, R.string.MenuSetup);
-    	menu.add(0, MENU_ABOUT, 0, R.string.MenuAbout);
+    	menu.add(0, MENU_SETUP, 0, R.string.MenuSetup).setIcon(android.R.drawable.ic_menu_preferences);
+    	menu.add(0, MENU_ABOUT, 0, R.string.MenuAbout).setIcon(android.R.drawable.ic_menu_help);
     	return true;
     }
     
