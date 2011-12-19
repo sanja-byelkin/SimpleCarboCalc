@@ -159,7 +159,17 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		catch (NumberFormatException ex)
 		{
-			val= Double.NaN;
+			/*
+             * It could be mess with , and . in different locale setting => try to fix
+             */
+            try {
+            	val= new Double(txt.getText().toString().replace(',', '.'));
+            	val= checkNegative(val);
+            }
+            catch (NumberFormatException ex2)
+            {
+            	val= Double.NaN;
+            }
 		}
 		return val;
 	}
