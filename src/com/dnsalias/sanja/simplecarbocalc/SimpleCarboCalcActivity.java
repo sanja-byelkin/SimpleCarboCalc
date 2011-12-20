@@ -12,6 +12,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	public static final String PREFS_NAME = "MyState";
 
+	private static final String LOGTAG = "SimpleCarboCalcActivity";
 	/**
 	 * Constants to identify saved state
 	 */
@@ -233,6 +235,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   carb*= UNIT_FACTOR[mUnitSetup];
 				   setDoubleValue(mText[N_PROC], new Double(carb * 100 / total));
 			   }
+			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_PROC:" + mText[N_PROC].getText().toString());
 			   break;
 		   case N_TOTAL:
 			   proc= getProcent();
@@ -244,6 +247,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   carb*= UNIT_FACTOR[mUnitSetup];
 				   setDoubleValue(mText[N_TOTAL], new Double(carb/proc));
 			   }
+			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_TOTAL:" + mText[N_TOTAL].getText().toString());
 			   break;
 		   case N_CARB:
 			   proc= getProcent();
@@ -252,6 +256,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   setToError(mText[N_CARB]);
 			   else
 				   setDoubleValue(mText[N_CARB], new Double(total*proc/UNIT_FACTOR[mUnitSetup]));
+			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_CARB:" + mText[N_CARB].getText().toString());
 			   break;
 		   }
 	
@@ -273,6 +278,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				mRadioButton[i].setChecked(i == mSequence[2]);
 				changed= true;
 			}
+		Log.w(LOGTAG,"setRadio " + (changed ? "changed" : "non-changed"));
 		return changed;
 	}
 	
@@ -283,6 +289,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private boolean setFocusTo(int focus)
 	{
+		Log.w(LOGTAG,"setFocusTo " + focus);
 		if (mSequence[0] != focus)
 		{
 			if (mSequence[1] != focus)
@@ -303,6 +310,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private boolean setCalculatorTo(int calc)
 	{
+		Log.w(LOGTAG,"setCalculatorTo " + calc);
 		if (mSequence[2] != calc)
 		{
 			if (mSequence[1] != calc)
@@ -389,6 +397,7 @@ public class SimpleCarboCalcActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
+        Log.w(LOGTAG,"onActivityResult...");
         if (intent != null)
         {
         	if (requestCode == ACTIVITY_SETUP && resultCode == RESULT_OK)
@@ -408,6 +417,7 @@ public class SimpleCarboCalcActivity extends Activity {
         					mIsSetupProcess= true;
         					setDoubleValue(mText[N_CARB], new Double((carb*old_unit)/new_unit));
         					mIsSetupProcess= false;
+        					Log.w(LOGTAG,"onActivityResult reset N_CARB");
         				}
         				saveAppState(); // Save new unit (and everything else)
         				setCarbUnitsName();
@@ -422,6 +432,7 @@ public class SimpleCarboCalcActivity extends Activity {
      */  
     private void saveAppState()
     {
+    	Log.w(LOGTAG,"saveAppState...");
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(STATE_SEQ0, mSequence[0]);
@@ -431,7 +442,8 @@ public class SimpleCarboCalcActivity extends Activity {
         editor.putString(STATE_TOTAL, mText[N_TOTAL].getText().toString());
         editor.putString(STATE_CARB, mText[N_CARB].getText().toString());
         editor.putInt(STATE_UNIT, mUnitSetup);
-        editor.commit(); 	
+        editor.commit();
+        Log.w(LOGTAG,"saveAppState done");
     }
     
     /**
