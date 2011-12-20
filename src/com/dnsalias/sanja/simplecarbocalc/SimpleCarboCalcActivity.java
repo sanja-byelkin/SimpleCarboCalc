@@ -2,7 +2,6 @@ package com.dnsalias.sanja.simplecarbocalc;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,7 +20,6 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.TextView;
 
 /**
  * 
