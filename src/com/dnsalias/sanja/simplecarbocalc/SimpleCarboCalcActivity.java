@@ -27,7 +27,7 @@ import android.widget.RadioButton;
  * @author Oleksander "Sanja" Byelkin
  *
  * @brief Simple Carbohydrates calculator: calculate 1 of 3 parameters by other 2 (% of Carbohydrates, Total
- * 		  weight of the product, wiegth of carbohydrates in it in units (1 unit = 1, 10 or 12gr)).
+ * 		  weight of the product, weight of carbohydrates in it in units (1 unit = 1, 10 or 12gr)).
  * 
  * @license GPL V2
  * 
@@ -235,7 +235,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   carb*= UNIT_FACTOR[mUnitSetup];
 				   setDoubleValue(mText[N_PROC], new Double(carb * 100 / total));
 			   }
-			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_PROC:" + mText[N_PROC].getText().toString());
+			   Log.v(LOGTAG,"mTextWatcher afterTextChanged N_PROC:" + mText[N_PROC].getText().toString());
 			   break;
 		   case N_TOTAL:
 			   proc= getProcent();
@@ -247,7 +247,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   carb*= UNIT_FACTOR[mUnitSetup];
 				   setDoubleValue(mText[N_TOTAL], new Double(carb/proc));
 			   }
-			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_TOTAL:" + mText[N_TOTAL].getText().toString());
+			   Log.v(LOGTAG,"mTextWatcher afterTextChanged N_TOTAL:" + mText[N_TOTAL].getText().toString());
 			   break;
 		   case N_CARB:
 			   proc= getProcent();
@@ -256,7 +256,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				   setToError(mText[N_CARB]);
 			   else
 				   setDoubleValue(mText[N_CARB], new Double(total*proc/UNIT_FACTOR[mUnitSetup]));
-			   Log.w(LOGTAG,"mTextWatcher afterTextChanged N_CARB:" + mText[N_CARB].getText().toString());
+			   Log.v(LOGTAG,"mTextWatcher afterTextChanged N_CARB:" + mText[N_CARB].getText().toString());
 			   break;
 		   }
 	
@@ -278,7 +278,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				mRadioButton[i].setChecked(i == mSequence[2]);
 				changed= true;
 			}
-		Log.w(LOGTAG,"setRadio " + (changed ? "changed" : "non-changed"));
+		Log.v(LOGTAG,"setRadio " + (changed ? "changed" : "non-changed"));
 		return changed;
 	}
 	
@@ -289,7 +289,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private boolean setFocusTo(int focus)
 	{
-		Log.w(LOGTAG,"setFocusTo " + focus);
+		Log.v(LOGTAG,"setFocusTo " + focus);
 		if (mSequence[0] != focus)
 		{
 			if (mSequence[1] != focus)
@@ -310,7 +310,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private boolean setCalculatorTo(int calc)
 	{
-		Log.w(LOGTAG,"setCalculatorTo " + calc);
+		Log.v(LOGTAG,"setCalculatorTo " + calc);
 		if (mSequence[2] != calc)
 		{
 			if (mSequence[1] != calc)
@@ -397,7 +397,7 @@ public class SimpleCarboCalcActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        Log.w(LOGTAG,"onActivityResult...");
+        Log.v(LOGTAG,"onActivityResult...");
         if (intent != null)
         {
         	if (requestCode == ACTIVITY_SETUP && resultCode == RESULT_OK)
@@ -417,7 +417,7 @@ public class SimpleCarboCalcActivity extends Activity {
         					mIsSetupProcess= true;
         					setDoubleValue(mText[N_CARB], new Double((carb*old_unit)/new_unit));
         					mIsSetupProcess= false;
-        					Log.w(LOGTAG,"onActivityResult reset N_CARB");
+        					Log.v(LOGTAG,"onActivityResult reset N_CARB");
         				}
         				saveAppState(); // Save new unit (and everything else)
         				setCarbUnitsName();
@@ -432,7 +432,7 @@ public class SimpleCarboCalcActivity extends Activity {
      */  
     private void saveAppState()
     {
-    	Log.w(LOGTAG,"saveAppState...");
+    	Log.v(LOGTAG,"saveAppState...");
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(STATE_SEQ0, mSequence[0]);
@@ -443,7 +443,7 @@ public class SimpleCarboCalcActivity extends Activity {
         editor.putString(STATE_CARB, mText[N_CARB].getText().toString());
         editor.putInt(STATE_UNIT, mUnitSetup);
         editor.commit();
-        Log.w(LOGTAG,"saveAppState done");
+        Log.v(LOGTAG,"saveAppState done");
     }
     
     /**
