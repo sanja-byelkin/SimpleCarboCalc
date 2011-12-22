@@ -1,0 +1,13 @@
+# Initial backup of data and setup to be used in first start
+# file consists of pairs keyword=value everything else ignored
+
+#Units (0 - grams, 1 - unit 10gr. 2 - unit 12gr)
+units=2
+
+#Available languages
+lang=ru~Русский|uk~Українська|en~English
+
+#products
+prod=50|ru~Белый хлеб|uk~Билій хліб|en~White bread
+prod=40|ru~Ржаной хлеб|uk~Житній хліб|en~Rye bread
+prod=66.67|ru~Сухари (не сладкие)|uk~Сухарі (не солодкі)|en~Dried crust
