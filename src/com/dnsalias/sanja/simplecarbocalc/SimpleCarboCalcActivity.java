@@ -388,8 +388,34 @@ public class SimpleCarboCalcActivity extends Activity {
         setCarbUnitsName();
         setRadio();
         mText[mSequence[0]].requestFocus();
+        
+        ProdList.getInstance().setActivity(this);
+        ProdList.getInstance().loadInitFile(getResources());
     }
 
+    public void setUnits(int new_unit_idx)
+    {
+    	if (new_unit_idx != mUnitSetup)
+		{
+			int old_unit= UNIT_FACTOR[mUnitSetup];
+			if (new_unit_idx != -1)
+			{
+				int new_unit= UNIT_FACTOR[new_unit_idx];
+				Double carb= getPositiveDoubleValue(mText[N_CARB]);
+				mUnitSetup= new_unit_idx;
+				if (!carb.isNaN())
+				{
+					mIsSetupProcess= true;
+					setDoubleValue(mText[N_CARB], new Double((carb*old_unit)/new_unit));
+					mIsSetupProcess= false;
+					Log.v(LOGTAG,"onActivityResult reset N_CARB");
+				}
+				saveAppState(); // Save new unit (and everything else)
+				setCarbUnitsName();
+			}
+		}
+    }
+    
     /**
      * Process results of setup
      */
@@ -404,25 +430,7 @@ public class SimpleCarboCalcActivity extends Activity {
         	{
         		Bundle bundle= intent.getExtras();
         		int new_unit_idx= bundle.getInt(CONFIG_UNIT, -1);
-        		if (new_unit_idx != mUnitSetup)
-        		{
-        			int old_unit= UNIT_FACTOR[mUnitSetup];
-        			if (new_unit_idx != -1)
-        			{
-        				int new_unit= UNIT_FACTOR[new_unit_idx];
-        				Double carb= getPositiveDoubleValue(mText[N_CARB]);
-        				mUnitSetup= new_unit_idx;
-        				if (!carb.isNaN())
-        				{
-        					mIsSetupProcess= true;
-        					setDoubleValue(mText[N_CARB], new Double((carb*old_unit)/new_unit));
-        					mIsSetupProcess= false;
-        					Log.v(LOGTAG,"onActivityResult reset N_CARB");
-        				}
-        				saveAppState(); // Save new unit (and everything else)
-        				setCarbUnitsName();
-        			}
-        		}
+        		setUnits(new_unit_idx);
         	}
         }
     }
