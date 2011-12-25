@@ -1,15 +1,21 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Locale;
 
 import android.content.ContentValues;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -36,19 +42,23 @@ public class ProdList
         return sInstance;
     }
 	
-	private SimpleCarboCalcActivity activity;
-	private ProdListOpenHelper dbHelper;
+	private SimpleCarboCalcActivity mActivity= null;
+	private ProdListOpenHelper mDbHelper= null;
+    private boolean mExternalStorageAvailable= false;
+    private boolean mExternalStorageWriteable= false;
+    private File mExternalMyDirectory= null;
+
 	
     public ProdList()
     {
-    	activity= null;
-    	dbHelper= null;
+    	mActivity= null;
+    	mDbHelper= null;
     }
     
     public void setActivity(SimpleCarboCalcActivity activity_arg)
     {
-    	activity= activity_arg;
-    	dbHelper= new ProdListOpenHelper(activity);
+    	mActivity= activity_arg;
+    	mDbHelper= new ProdListOpenHelper(mActivity);
     }
     
     /**
@@ -71,7 +81,7 @@ public class ProdList
 			Log.e(LOGTAG, "Unrecognized 'units' config value: '" + unitParam + "'");
 			return true;
 		}
-		activity.setUnits(units);
+		mActivity.setUnits(units);
 		return false;
     }
     
@@ -199,7 +209,7 @@ public class ProdList
     synchronized boolean loadBackupFile(boolean merge, InputStream inputStream)
     {
     	boolean ok= true;
-    	SQLiteDatabase db= dbHelper.getWritableDatabase();
+    	SQLiteDatabase db= mDbHelper.getWritableDatabase();
     	db.beginTransaction();
     	if (!merge)
     	{
@@ -279,6 +289,7 @@ public class ProdList
     	db.execSQL("VACUUM;");
     	return !ok;
     }
+
     
     boolean loadInitFile(Resources resources)
     {
@@ -286,4 +297,167 @@ public class ProdList
     	return loadBackupFile(false, inputStream);
     }
     
+    void checkExternal()
+    {
+     	String state = Environment.getExternalStorageState();
+
+    	if (Environment.MEDIA_MOUNTED.equals(state))
+    	{
+    	    mExternalStorageAvailable = mExternalStorageWriteable = true; 	    
+    	}
+    	else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))
+    	{
+    	    mExternalStorageAvailable = true;
+    	    mExternalStorageWriteable = false;
+    	}
+    	else
+    	{
+     	    mExternalStorageAvailable = mExternalStorageWriteable = false;
+    	}
+    	Log.v(LOGTAG, "external storage:" +
+    			(mExternalStorageAvailable ? "available " : "unavaliable ") +
+    			(mExternalStorageWriteable ? "writable" : "non-writable"));
+    	if (mExternalStorageWriteable)
+    	{
+        	File extDir= Environment.getExternalStorageDirectory();
+        	if (mExternalMyDirectory == null)
+        		mExternalMyDirectory= new File(extDir, "SimpleCarboCalc");
+        	if (!mExternalMyDirectory.isDirectory())
+        	{
+        		if (!mExternalMyDirectory.mkdir())
+        		{
+        			Log.e(LOGTAG, "Can't create directory: " + mExternalMyDirectory);
+        			mExternalStorageWriteable= false;
+        		}
+        		else
+        			Log.v(LOGTAG, "Directory created: " + mExternalMyDirectory);
+        		
+        		//mExternalMyDirectory.setWritable(true);
+        	}
+        	else
+        		Log.v(LOGTAG, "Directory: " + mExternalMyDirectory);
+    	}
+    }
+    
+    void writeUnits(OutputStream out) throws IOException
+    {
+    	StringBuffer str= new StringBuffer(10);
+    	str.append("units=");
+    	str.append(mActivity.getUnits());
+    	str.append('\n');
+    	out.write(str.toString().getBytes());
+    }
+    
+    void writeLangs(OutputStream out, SQLiteDatabase db) throws IOException
+    {
+    	StringBuffer str= new StringBuffer(100);
+    	str.append("lang=");
+    	String fields[]= {PROD_LANG, PROD_LANGNAME};
+    	Cursor res= db.query(LANGLIST_TABLE_NAME, fields, null, null, null, null, null);
+    	if (res.getCount() == 0)
+    	{
+    		Log.e(LOGTAG, "No laguages in DB");
+    	}
+    	boolean first= true;
+    	while (res.moveToNext())
+    	{
+    		if (!first)
+    			str.append('|');
+    		str.append(res.getString(0));
+    		str.append('~');
+    		str.append(res.getString(1));
+    		first= false;
+    	}
+    	res.close();
+    	str.append('\n');
+    	out.write(str.toString().getBytes());
+    }
+    
+    void writeProds(OutputStream out, SQLiteDatabase db) throws IOException
+    {
+    	String fieldsHeader[]= {PROD_ID, PROD_CARB};
+    	String fields[]= {PROD_LANG, PROD_NAME};
+
+    	Cursor resHeader= db.query(FULLPRODLIST_TABLE_NAME, fieldsHeader,
+    			null, null, null, null, null);
+    	if (resHeader.getCount() == 0)
+    	{
+    		Log.e(LOGTAG, "No Prods in DB");
+    	}
+    	while (resHeader.moveToNext())
+    	{
+    		StringBuffer str= new StringBuffer(100);
+    		str.append("prod=");
+    		str.append(resHeader.getDouble(1));
+    		Cursor res= db.query(FULLPRODLISTNAME_TABLE_NAME, fields,
+    				PROD_ID + "=" + resHeader.getLong(0),
+    				null, null, null, null, null);
+    		if (res.getCount() == 0)
+    		{
+    			Log.e(LOGTAG, "No Prod Names in DB :" + resHeader.getLong(0));
+    		}
+    		while (res.moveToNext())
+        	{
+        		str.append('|');
+        		str.append(res.getString(0));
+        		str.append('~');
+        		str.append(res.getString(1));
+        	}
+    		str.append('\n');
+    		out.write(str.toString().getBytes());
+    	}
+    	resHeader.close();
+    }
+    
+    boolean backupConfig()
+    {
+    	checkExternal();
+        if (!mExternalStorageWriteable)
+        	return true;
+        File backup= new File(mExternalMyDirectory, "backup.txt");
+        try
+        {
+        	if (!backup.isFile() && !backup.createNewFile())
+        	{
+        		Log.e(LOGTAG, "Can't create file " + backup);
+        		return true;
+        	}
+        }
+        catch (IOException ex)
+        {
+        	Log.e(LOGTAG, "Can't create file '" + backup + "': " + ex);
+    		return true;
+        }
+        OutputStream out= null;
+        try
+        {
+          out = new BufferedOutputStream(new FileOutputStream(backup));
+          SQLiteDatabase db= mDbHelper.getReadableDatabase();
+          writeUnits(out);
+          writeLangs(out, db);
+          writeProds(out, db);
+          out.flush();
+        }
+        
+        catch(FileNotFoundException ex)
+        {
+        	Log.e(LOGTAG, "Can't find file '" + backup + "': " + ex);
+        	return false;
+        }
+        
+        catch(IOException ex)
+        {
+        	Log.e(LOGTAG, "Can't write file '" + backup + "': " + ex);
+        	return false;
+        }
+
+        finally
+        {
+        	if (out != null)
+        	{
+        		try { out.close(); } catch (IOException ex) {};
+        	}
+        }
+    	return false;
+    }
 }

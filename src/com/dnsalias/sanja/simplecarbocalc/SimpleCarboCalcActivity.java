@@ -80,6 +80,11 @@ public class SimpleCarboCalcActivity extends Activity {
 	private int mUnitSetup;
 	private boolean mIsSetupProcess= false;
 	
+	int getUnits()
+	{
+		return mUnitSetup;
+	}
+	
 	/**
 	 * Text fields
 	 */
@@ -389,8 +394,10 @@ public class SimpleCarboCalcActivity extends Activity {
         setRadio();
         mText[mSequence[0]].requestFocus();
         
+        
         ProdList.getInstance().setActivity(this);
-        ProdList.getInstance().loadInitFile(getResources());
+        ProdList.getInstance().loadInitFile(getResources());       
+        ProdList.getInstance().backupConfig();
     }
 
     public void setUnits(int new_unit_idx)
