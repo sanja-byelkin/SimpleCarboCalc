@@ -20,7 +20,9 @@ import android.view.View.OnFocusChangeListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.SimpleCursorAdapter;
 
 /**
  * 
@@ -98,6 +100,8 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * (first (index 0) parameter is in focus, last (index 2) parameter is calculating parameter
 	 */
 	private int mSequence[]= {N_PROC, N_TOTAL, N_CARB};
+	
+	SimpleCursorAdapter mListAdapter;
 
 	/**
 	 * Finds index of the View object in the given array
@@ -392,12 +396,19 @@ public class SimpleCarboCalcActivity extends Activity {
          */
         setCarbUnitsName();
         setRadio();
-        mText[mSequence[0]].requestFocus();
-        
         
         ProdList.getInstance().setActivity(this);
-        ProdList.getInstance().loadInitFile(getResources());       
-        ProdList.getInstance().backupConfig();
+        ProdList.getInstance().loadInitFile(getResources());
+        mText[mSequence[0]].requestFocus();
+        mListAdapter= new SimpleCursorAdapter(getBaseContext(),
+        		android.R.layout.two_line_list_item,
+        		ProdList.getInstance().getCoursorForRequest(null),
+        		new String[] {ProdList.PROD_NAME, ProdList.PROD_CARB},
+        		new int[] {android.R.id.text1, android.R.id.text2});
+        ((ListView)findViewById(R.id.listProd)).setAdapter(mListAdapter);
+        
+        //ProdList.getInstance().loadInitFile(getResources());       
+        //ProdList.getInstance().backupConfig();
     }
 
     public void setUnits(int new_unit_idx)

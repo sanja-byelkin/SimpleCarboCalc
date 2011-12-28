@@ -24,7 +24,7 @@ public class ProdList
 	private static final String LOGTAG = "SimpleCarboCalcActivity.ProdList";
 	
 	static final String PROD_ID= "prod_id";
-	static final String PROD__ID= "_ID";
+	static final String PROD__ID= "_id";
 	static final String PROD_CARB= "prod_carb";
 	static final String PROD_LANG= "prod_lang";
 	static final String PROD_NAME= "prod_name";
@@ -459,5 +459,20 @@ public class ProdList
         	}
         }
     	return false;
+    }
+    
+    Cursor getCoursorForRequest(String req)
+    {
+    	String where= null;
+    	String vars[]= null;
+    	SQLiteDatabase db= mDbHelper.getWritableDatabase();
+    	String fields[]= {PROD__ID, PROD_NAME, PROD_CARB};
+    	if (req != null)
+    	{
+    		vars= new String[1];
+    		vars[0]= req + "*";
+    		where= PROD_NAME + " MATCH ?";
+    	}
+    	return db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null, null);
     }
 }
