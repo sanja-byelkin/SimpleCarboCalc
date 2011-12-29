@@ -93,25 +93,24 @@
             android:id="@+id/linearLayout1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
+  			 <ImageButton
+            	android:id="@+id/add"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:src="@drawable/ic_plus" />
 
-            <Button
-                android:id="@+id/add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+" />
+        	<ImageButton
+            	android:id="@+id/remove"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:src="@drawable/ic_minus" />
 
-            <Button
-                android:id="@+id/remove"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-" />
-
-            <Button
-                android:id="@+id/search"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="S" />
-
+        	<ImageButton
+            	android:id="@+id/search"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:src="@drawable/ic_search" />
+        	
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"

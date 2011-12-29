@@ -91,23 +91,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
-        <Button
+        <ImageButton
             android:id="@+id/add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+" />
+            android:src="@drawable/ic_plus" />
 
-        <Button
+        <ImageButton
             android:id="@+id/remove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-" />
+            android:src="@drawable/ic_minus" />
 
-        <Button
+        <ImageButton
             android:id="@+id/search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="S" />
+            android:src="@drawable/ic_search" />
         
         <TextView
             android:id="@+id/textView1"
