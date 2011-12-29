@@ -499,4 +499,17 @@ public class ProdList {
 		return db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
 	}
+	
+	double getCarbProc(long id)
+	{
+		double proc;
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		String fields[] = { PROD_CARB };
+		Cursor res= db.query(FULLPRODLIST_TABLE_NAME, fields, PROD_ID + "=" + id,
+				null, null, null, null);
+		res.moveToFirst();
+		proc= res.getFloat(0);
+		res.close();
+		return proc;
+	}
 }

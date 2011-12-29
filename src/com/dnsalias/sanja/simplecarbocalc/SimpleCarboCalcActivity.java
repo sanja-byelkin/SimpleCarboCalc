@@ -17,9 +17,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleCursorAdapter;
@@ -80,7 +83,9 @@ public class SimpleCarboCalcActivity extends Activity {
 	public static final int UNIT_FACTOR[]= {1, 10, 12};
 	
 	private int mUnitSetup;
+	
 	private boolean mIsSetupProcess= false;
+	
 	
 	int getUnits()
 	{
@@ -101,7 +106,16 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	private int mSequence[]= {N_PROC, N_TOTAL, N_CARB};
 	
-	SimpleCursorAdapter mListAdapter;
+	/**
+	 * ID of last touched product in the DB or -1
+	 */
+	private long  mLastTouched= -1;
+	
+	private ListView mProdList;
+	private ImageButton mPlusButton;
+    private ImageButton mMinusButton;
+    private ImageButton mSearchButton;
+    private SimpleCursorAdapter mListAdapter;
 
 	/**
 	 * Finds index of the View object in the given array
@@ -120,13 +134,28 @@ public class SimpleCarboCalcActivity extends Activity {
 	/**
 	 * Listener of focus changing for text fields to detect which parameter should be calculated
 	 */
-	private OnFocusChangeListener mTextListener = new OnFocusChangeListener() {
+	private OnFocusChangeListener mTextListener= new OnFocusChangeListener() {
 		public void onFocusChange(View v, boolean hasFocus) {
 			int i= getElementIndex(v, mText);
 			if (hasFocus && !mIsSetupProcess)
 			{
 				setFocusTo(i);
 			}
+	    }
+	};
+	
+	/**
+	 * Listener on product list items click
+	 */
+	private OnItemClickListener  mProductListener= new OnItemClickListener () {
+		public void onItemClick(AdapterView parent, View view, int position, long id)
+		{
+			mLastTouched= id;
+			checkLastTouched();
+			double proc= ProdList.getInstance().getCarbProc(id);
+			mText[N_PROC].requestFocus();
+			setDoubleValue(mText[N_PROC], new Double(proc));
+			
 	    }
 	};
 	
@@ -274,6 +303,15 @@ public class SimpleCarboCalcActivity extends Activity {
 	   public void onTextChanged(CharSequence s, int start, int before, int count) {}
 	};
 	
+	private TextWatcher mTextWatcherRemoveTouch= new TextWatcher() {
+		public void afterTextChanged(Editable s)
+		{
+			mLastTouched= -1;
+			checkLastTouched();
+		}
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+		public void onTextChanged(CharSequence s, int start, int before, int count) {}
+	};
 	/**
 	 * Checks and sets all Radio buttons according to current state of mSequence
 	 * @return
@@ -344,6 +382,11 @@ public class SimpleCarboCalcActivity extends Activity {
 		mRadioButton[N_CARB].setText(names[mUnitSetup]);
 	}
 	
+	void checkLastTouched()
+	{
+		mMinusButton.setEnabled(mLastTouched > 0);
+	}
+	
     /**
      * Called when the activity is first created.
      */
@@ -361,7 +404,11 @@ public class SimpleCarboCalcActivity extends Activity {
         mRadioButton[N_PROC]= (RadioButton) findViewById(R.id.radioButtonProc);
         mRadioButton[N_TOTAL]= (RadioButton) findViewById(R.id.radioButtonTotal);
         mRadioButton[N_CARB]= (RadioButton) findViewById(R.id.radioButtonCarb);
-        
+        mProdList= (ListView) findViewById(R.id.listProd);
+        mPlusButton= (ImageButton) findViewById(R.id.add);
+        mMinusButton= (ImageButton) findViewById(R.id.remove);
+        mSearchButton= (ImageButton) findViewById(R.id.search);
+        	
         /*
          * Restore state of the application
          */
@@ -391,11 +438,13 @@ public class SimpleCarboCalcActivity extends Activity {
         	mText[i].addTextChangedListener(mTextWatcher);
         	mRadioButton[i].setOnCheckedChangeListener(mRadioListener);
         }
+        mText[N_PROC].addTextChangedListener(mTextWatcherRemoveTouch);
         /*
          * Set initial state of focus and ratio buttons
          */
         setCarbUnitsName();
         setRadio();
+        checkLastTouched();
         
         ProdList.getInstance().setActivity(this);
         ProdList.getInstance().loadInitFileIfEmpty(getResources());
@@ -405,7 +454,9 @@ public class SimpleCarboCalcActivity extends Activity {
         		ProdList.getInstance().getCoursorForRequest(null),
         		new String[] {ProdList.PROD_NAME, ProdList.PROD_CARB},
         		new int[] {android.R.id.text1, android.R.id.text2});
-        ((ListView)findViewById(R.id.listProd)).setAdapter(mListAdapter);
+        ListView prodList= (ListView)findViewById(R.id.listProd);
+        prodList.setAdapter(mListAdapter);
+        prodList. setOnItemClickListener(mProductListener);
         
         //ProdList.getInstance().loadInitFile(getResources());       
         //ProdList.getInstance().backupConfig();
