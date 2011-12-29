@@ -150,12 +150,11 @@ public class SimpleCarboCalcActivity extends Activity {
 	private OnItemClickListener  mProductListener= new OnItemClickListener () {
 		public void onItemClick(AdapterView parent, View view, int position, long id)
 		{
-			mLastTouched= id;
-			checkLastTouched();
 			double proc= ProdList.getInstance().getCarbProc(id);
 			mText[N_PROC].requestFocus();
 			setDoubleValue(mText[N_PROC], new Double(proc));
-			
+			mLastTouched= id;
+			checkLastTouched();
 	    }
 	};
 	
@@ -384,6 +383,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	
 	void checkLastTouched()
 	{
+		Log.v(LOGTAG, "mLastTouched: " + mLastTouched);
 		mMinusButton.setEnabled(mLastTouched > 0);
 	}
 	
