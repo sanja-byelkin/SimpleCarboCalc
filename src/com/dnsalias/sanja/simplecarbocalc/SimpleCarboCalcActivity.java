@@ -398,7 +398,7 @@ public class SimpleCarboCalcActivity extends Activity {
         setRadio();
         
         ProdList.getInstance().setActivity(this);
-        ProdList.getInstance().loadInitFile(getResources());
+        ProdList.getInstance().loadInitFileIfEmpty(getResources());
         mText[mSequence[0]].requestFocus();
         mListAdapter= new SimpleCursorAdapter(getBaseContext(),
         		android.R.layout.two_line_list_item,
