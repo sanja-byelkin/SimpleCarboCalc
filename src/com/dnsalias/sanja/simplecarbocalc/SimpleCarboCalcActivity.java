@@ -46,7 +46,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	public static final String STATE_UNIT= "Unit";
 	public static final String STATE_SEQ0= "Sequence0";
 	public static final String STATE_SEQ1= "Sequence1";
-	public static final String STATE_SEQ2= "Sequence1";
+	public static final String STATE_SEQ2= "Sequence2";
 	public static final String STATE_PROC= "Proc";
 	public static final String STATE_TOTAL= "Total";
 	public static final String STATE_CARB= "Carb";
