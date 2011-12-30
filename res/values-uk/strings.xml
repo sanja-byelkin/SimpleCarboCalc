@@ -22,5 +22,8 @@
     <string name="MenuSetup">Налаштув-ня</string>
     <string name="MenuAbout">О програмі</string>
     <string name="About">вираховує один з йго параметрів згідно двох інших.</string>
-    
+    <string name="ProductAdd">Додати продукт</string>
+    <string name="ProductEdit">Редагувати продукт</string>
+    <string name="Language">Мова</string>
+    <string name="ProductName">Назва продукту</string>
 </resources>

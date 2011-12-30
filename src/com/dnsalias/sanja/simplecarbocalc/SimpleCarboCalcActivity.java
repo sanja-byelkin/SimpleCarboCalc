@@ -115,6 +115,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	
 	private ListView mProdList;
 	private ImageButton mPlusButton;
+	private ImageButton mEditButton;
     private ImageButton mMinusButton;
     private ImageButton mSearchButton;
     private SimpleCursorAdapter mListAdapter;
@@ -242,7 +243,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	}
 	
 	/**
-	 * Shows value inthe fields that indicates inability to calculate it
+	 * Shows value in the fields that indicates inability to calculate it
 	 * @param txt The field where to show error
 	 */
 	private void setToError(EditText txt)
@@ -387,6 +388,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	{
 		Log.v(LOGTAG, "mLastTouched: " + mLastTouched);
 		mMinusButton.setEnabled(mLastTouched > 0);
+		mEditButton.setEnabled(mLastTouched > 0);
 	}
 	
     /**
@@ -408,6 +410,7 @@ public class SimpleCarboCalcActivity extends Activity {
         mRadioButton[N_CARB]= (RadioButton) findViewById(R.id.radioButtonCarb);
         mProdList= (ListView) findViewById(R.id.listProd);
         mPlusButton= (ImageButton) findViewById(R.id.add);
+        mEditButton= (ImageButton) findViewById(R.id.edit);
         mMinusButton= (ImageButton) findViewById(R.id.remove);
         mSearchButton= (ImageButton) findViewById(R.id.search);
         	
@@ -442,7 +445,7 @@ public class SimpleCarboCalcActivity extends Activity {
         	mRadioButton[i].setOnCheckedChangeListener(mRadioListener);
         }
         mText[N_PROC].addTextChangedListener(mTextWatcherRemoveTouch);
-        
+
         /*
          * Load configuration and db if it is needed
          */

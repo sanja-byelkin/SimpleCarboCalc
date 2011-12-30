@@ -23,4 +23,8 @@
     <string name="MenuSetup">Setup</string>
     <string name="MenuAbout">About</string>
     <string name="About">calculates one of its three parameters by other two.</string>
+    <string name="ProductAdd">Add a product</string>
+    <string name="ProductEdit">Edit a product</string>
+    <string name="Language">Language</string>
+    <string name="ProductName">Product name</string>
 </resources>

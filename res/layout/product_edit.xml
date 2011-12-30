@@ -5,11 +5,28 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textHeader"
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/CalcField" />
+        android:text="@string/ProductEdit" />
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+ 	   <Button
+ 	       android:id="@+id/ok"
+ 	       android:layout_width="wrap_content"
+ 	       android:layout_height="wrap_content"
+ 	       android:text="@android:string/ok" />
+
+ 	   <Button
+ 	       android:id="@+id/cancel"
+ 	       android:layout_width="wrap_content"
+ 	       android:layout_height="wrap_content"
+ 	       android:text="@android:string/cancel" />
     
+	</LinearLayout>
     <TableLayout
         android:id="@+id/tableLayout1"
         android:layout_width="fill_parent"
@@ -20,24 +37,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
-            <RadioButton
-                android:id="@+id/radioButtonProc"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/CarbProc"
-                android:focusable="true" />
+                android:text="@string/CarbProc" />
 
             <EditText
-                android:id="@+id/editTextProc"
-                android:layout_width="wrap_content"
+                android:id="@+id/editText1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:inputType="numberDecimal" >
 
                 <requestFocus />
             </EditText>
-
         </TableRow>
 
         <TableRow
@@ -45,20 +60,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
-            <RadioButton
-                android:id="@+id/radioButtonTotal"
+            <ImageView
+                android:id="@+id/imageView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/GrossWeigth"
-                android:focusable="true" />
-
-            <EditText
-                android:id="@+id/editTextTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:inputType="numberDecimal" />
+                android:src="@drawable/line" />
 
         </TableRow>
 
@@ -67,28 +73,44 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
-            <RadioButton
-                android:id="@+id/radioButtonCarb"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Carb"
-                android:focusable="true" />
+                android:text="@string/Language" />
+
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/ProductName" />
 
             <EditText
-                android:id="@+id/editTextCarb"
-                android:layout_width="wrap_content"
+                android:id="@+id/editText2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:inputType="numberDecimal" />
-
+                android:layout_weight="1" />
         </TableRow>
 
     </TableLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <ImageButton
@@ -96,7 +118,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_plus" />
-        
+
         <ImageButton
             android:id="@+id/edit"
             android:layout_width="wrap_content"
@@ -109,25 +131,12 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_minus" />
 
-        <ImageButton
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_search" />
-        
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="*"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-        
-        </LinearLayout>
+    </LinearLayout>
 
     <ListView
-        android:id="@+id/listProd"
+        android:id="@+id/names"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
     </ListView>
-    
+
 </LinearLayout>

@@ -22,4 +22,8 @@
     <string name="MenuSetup">Настройка</string>
     <string name="MenuAbout">О программе</string>
     <string name="About">вычисляет один из его параметров по двум другим.</string>
+    <string name="ProductAdd">Добавить продукт</string>
+    <string name="ProductEdit">Редактировать продукт</string>
+    <string name="Language">Язык</string>
+    <string name="ProductName">Название продукта</string>
 </resources>
