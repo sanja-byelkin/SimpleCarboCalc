@@ -6,6 +6,7 @@
     <string name="CalcField">Вырахуване Поле</string>
     <string name="setup_name">Налаштування Простого Калькулятора Вуглеводів</string>
     <string name="CarbUnitsToShow">Одиниці для показу кількості вуглеводів</string>
+    <string name="LanguageToShowProducts">Мова для показу списка продуктів</string>
     <string name="OK">OK</string>
     <string name="Cancel">Відмінити</string>
     <string-array name="UnitChoose">

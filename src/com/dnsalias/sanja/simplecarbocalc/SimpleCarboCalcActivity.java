@@ -2,6 +2,7 @@ package com.dnsalias.sanja.simplecarbocalc;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -49,6 +50,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Constants to identify saved state
 	 */
 	public static final String STATE_UNIT= "Unit";
+	public static final String STATE_LANG= "Lang";
 	public static final String STATE_SEQ0= "Sequence0";
 	public static final String STATE_SEQ1= "Sequence1";
 	public static final String STATE_SEQ2= "Sequence1";
@@ -71,6 +73,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Constants to identify configure options
 	 */
 	public static final String CONFIG_UNIT= "unit_conf";
+	public static final String CONFIG_LANG= "lang_conf";
 	
 
 	/**
@@ -83,14 +86,13 @@ public class SimpleCarboCalcActivity extends Activity {
 	public static final int UNIT_FACTOR[]= {1, 10, 12};
 	
 	private int mUnitSetup;
+	private String mProdLangSetup;
 	
 	private boolean mIsSetupProcess= false;
 	
 	
-	int getUnits()
-	{
-		return mUnitSetup;
-	}
+	int getUnits() { return mUnitSetup;}
+	String getProdLang() { return mProdLangSetup; }
 	
 	/**
 	 * Text fields
@@ -417,9 +419,9 @@ public class SimpleCarboCalcActivity extends Activity {
         mSequence[1] = settings.getInt(STATE_SEQ1, 1);
         mSequence[2] = settings.getInt(STATE_SEQ2, 2);
         if (mSequence[0] < 0 || mSequence[1] < 0 || mSequence[2] < 0 ||
-        		mSequence[0] > 2 || mSequence[1] > 2 || mSequence[2] > 2 ||
-        		mSequence[0] == mSequence[1] || mSequence[0] == mSequence[2] ||
-        		mSequence[1] == mSequence[2])
+        	mSequence[0] > 2 || mSequence[1] > 2 || mSequence[2] > 2 ||
+        	mSequence[0] == mSequence[1] || mSequence[0] == mSequence[2] ||
+        	mSequence[1] == mSequence[2])
         {
         	for (int i= 0; i < 3; i++)
         		mSequence[i]= i;
@@ -428,6 +430,7 @@ public class SimpleCarboCalcActivity extends Activity {
         mText[N_TOTAL].setText(settings.getString(STATE_TOTAL, "100"));
         mText[N_CARB].setText(settings.getString(STATE_CARB, "1"));
         mUnitSetup= settings.getInt(STATE_UNIT, 2);
+        mProdLangSetup= settings.getString(STATE_LANG, Locale.getDefault().getLanguage());
         
 		/*
 		 * Set listeners
@@ -439,16 +442,22 @@ public class SimpleCarboCalcActivity extends Activity {
         	mRadioButton[i].setOnCheckedChangeListener(mRadioListener);
         }
         mText[N_PROC].addTextChangedListener(mTextWatcherRemoveTouch);
+        
+        /*
+         * Load configuration and db if it is needed
+         */
+        ProdList.getInstance().setActivity(this);
+        ProdList.getInstance().loadInitFileIfEmpty(getResources());
+
+        
         /*
          * Set initial state of focus and ratio buttons
          */
         setCarbUnitsName();
         setRadio();
-        checkLastTouched();
-        
-        ProdList.getInstance().setActivity(this);
-        ProdList.getInstance().loadInitFileIfEmpty(getResources());
+        checkLastTouched();       
         mText[mSequence[0]].requestFocus();
+        
         mListAdapter= new SimpleCursorAdapter(getBaseContext(),
         		android.R.layout.two_line_list_item,
         		ProdList.getInstance().getCoursorForRequest(null),
@@ -485,6 +494,20 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
     }
     
+    public void setProdLang(String new_lang)
+    {
+    	Log.v(LOGTAG,"setProdLang: '" + new_lang + "'");
+    	if (new_lang == null || new_lang.length() != 2)
+			new_lang= Locale.getDefault().getLanguage();
+
+    	if (new_lang.equals(mProdLangSetup))
+    		return; /* nothing changed */
+    	mProdLangSetup=  ProdList.getInstance().setNewProdLang(new_lang);
+    	mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(null));
+    	
+    	saveAppState();
+    }
+    
     /**
      * Process results of setup
      */
@@ -492,14 +515,16 @@ public class SimpleCarboCalcActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        Log.v(LOGTAG,"onActivityResult...");
+        Log.v(LOGTAG, "onActivityResult...");
         if (intent != null)
         {
         	if (requestCode == ACTIVITY_SETUP && resultCode == RESULT_OK)
         	{
         		Bundle bundle= intent.getExtras();
         		int new_unit_idx= bundle.getInt(CONFIG_UNIT, -1);
+        		String new_lang= bundle.getString(CONFIG_LANG);
         		setUnits(new_unit_idx);
+        		setProdLang(new_lang);
         	}
         }
     }
@@ -509,7 +534,7 @@ public class SimpleCarboCalcActivity extends Activity {
      */  
     private void saveAppState()
     {
-    	Log.v(LOGTAG,"saveAppState...");
+    	Log.v(LOGTAG, "saveAppState...");
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(STATE_SEQ0, mSequence[0]);
@@ -519,8 +544,9 @@ public class SimpleCarboCalcActivity extends Activity {
         editor.putString(STATE_TOTAL, mText[N_TOTAL].getText().toString());
         editor.putString(STATE_CARB, mText[N_CARB].getText().toString());
         editor.putInt(STATE_UNIT, mUnitSetup);
+        editor.putString(STATE_LANG, mProdLangSetup);
         editor.commit();
-        Log.v(LOGTAG,"saveAppState done");
+        Log.v(LOGTAG, "saveAppState done");
     }
     
     /**
@@ -553,6 +579,7 @@ public class SimpleCarboCalcActivity extends Activity {
             case MENU_SETUP:
             	intent = new Intent(this, SimpleCarboCalcSetup.class);
             	intent.putExtra(CONFIG_UNIT, mUnitSetup);
+            	intent.putExtra(CONFIG_LANG, mProdLangSetup);
             	startActivityForResult(intent, ACTIVITY_SETUP);
                 return true;
             case MENU_ABOUT:

@@ -11,3 +11,7 @@ lang=ru~Русский|uk~Українська|en~English
 prod=50|ru~Белый хлеб|uk~Билій хліб|en~White bread
 prod=40|ru~Ржаной хлеб|uk~Житній хліб|en~Rye bread
 prod=66.67|ru~Сухари (не сладкие)|uk~Сухарі (не солодкі)|en~Dried crust
+prod=80|ru~Крекеры|uk~Крекери|en~Cracker
+prod=80|ru~Макаронные изделия (сырые)|uk~Макарони вироби (сири)|en~Pasta (uncooked)
+prod=10.91|ru~Абрикос (с косточкой)|uk~Абрикос (з кісточкою)|en~Apricot (with stone)
+prod=8|ru~Апельсин (со шкуркой)|uk~Апельсин (з шкуркою)|en~Orange (with skin)

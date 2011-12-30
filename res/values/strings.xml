@@ -7,6 +7,7 @@
     <string name="CalcField">Calc.Field</string>
     <string name="setup_name">Setup of Simple Carbohydrates Calculator</string>
     <string name="CarbUnitsToShow">Units to show Carbohydrates amount</string>
+    <string name="LanguageToShowProducts">Language to show Products names</string>
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
     <string-array name="UnitChoose">

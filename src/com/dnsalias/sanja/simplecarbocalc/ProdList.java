@@ -229,6 +229,83 @@ public class ProdList {
 		}
 		return true;
 	}
+	
+	/**
+	 * Check and set the language for the product list
+	 * @param new_lang the language to set
+	 * @return language code which was really set.
+	 */
+	synchronized String setNewProdLang(String new_lang)
+	{
+		SQLiteDatabase db= mDbHelper.getWritableDatabase();
+		{ // check language
+			Cursor res= db.rawQuery("SELECT COUNT(*) FROM " + LANGLIST_TABLE_NAME + " WHERE " + PROD_LANG + " = ?;", new String[] {new_lang} );
+			res.moveToFirst();
+			if (res.getInt(0) != 1)
+			{  // assign just first legal language
+				Log.e(LOGTAG, "Language '" + new_lang + "' not found");
+				Cursor lg= db.rawQuery("SELECT " + PROD_LANG + " FROM " + LANGLIST_TABLE_NAME + ";", null);
+				if (lg.getCount() > 0)
+				{
+					lg.moveToFirst();
+					new_lang= lg.getString(0);
+					Log.w(LOGTAG, "Language '" + new_lang + "' taken");
+				}
+				else
+					Log.e(LOGTAG, "Language database is empty");
+				lg.close();
+			}
+			res.close();
+		}
+		db.beginTransaction();
+		if (!regenerateProductList(db, new_lang))
+			db.setTransactionSuccessful();
+		db.endTransaction();
+		return new_lang;
+	}
+	
+	/**
+	 * Regenerate product list for given language 
+	 * @param db - database handler
+	 * @param new_lang the new language
+	 * @return true in case of error, false if everything is OK
+	 */
+	private boolean regenerateProductList(SQLiteDatabase db, String new_lang)
+	{
+		boolean ok= true;
+		db.execSQL("DELETE FROM " + PRODLIST_TABLE_NAME + ";");
+		/* Create your language table */
+		Cursor res = db.rawQuery("SELECT " + FULLPRODLISTNAME_TABLE_NAME
+				+ "." + PROD_ID + "," + PROD_CARB + "," + PROD_NAME
+				+ " FROM " + FULLPRODLIST_TABLE_NAME + ","
+				+ FULLPRODLISTNAME_TABLE_NAME + " WHERE "
+				+ FULLPRODLIST_TABLE_NAME + "." + PROD_ID + "="
+				+ FULLPRODLISTNAME_TABLE_NAME + "." + PROD_ID + " and "
+				+ PROD_LANG + "='" + new_lang
+				+ "'", null);
+		Log.v(LOGTAG, "count for '" + new_lang
+				+ "': " + res.getCount());
+		if (res.getCount() == 0) {
+			Log.e(LOGTAG, "Empty result for languge: '"
+					+ Locale.getDefault().getLanguage() + "'");
+			ok= false;
+		} else
+			while (res.moveToNext()) {
+				Log.v(LOGTAG,
+						"id: " + res.getLong(0) + "  carb: "
+								+ res.getDouble(1) + " name: '"
+								+ res.getString(2) + "'");
+				ContentValues vals = new ContentValues(3);
+				vals.put(PROD__ID, res.getLong(0));
+				vals.put(PROD_CARB, res.getDouble(1));
+				vals.put(PROD_NAME, res.getString(2));
+				db.replace(PRODLIST_TABLE_NAME, null, vals);
+			}
+		;
+		res.close();
+		
+		return !ok;
+	}
 
 	/**
 	 * Loads configuration file.
@@ -240,14 +317,13 @@ public class ProdList {
 	 * @return true in case of error, false if everything is OK
 	 */
 	synchronized boolean loadBackupFile(boolean merge, InputStream inputStream) {
-		boolean ok = true;
-		SQLiteDatabase db = mDbHelper.getWritableDatabase();
+		boolean ok= true;
+		SQLiteDatabase db= mDbHelper.getWritableDatabase();
 		db.beginTransaction();
 		if (!merge) {
 			// cleanup the database
 			db.execSQL("DELETE FROM " + FULLPRODLIST_TABLE_NAME + ";");
 			db.execSQL("DELETE FROM " + FULLPRODLISTNAME_TABLE_NAME + ";");
-			db.execSQL("DELETE FROM " + PRODLIST_TABLE_NAME + ";");
 			db.execSQL("DELETE FROM " + LANGLIST_TABLE_NAME + ";");
 		}
 
@@ -272,14 +348,13 @@ public class ProdList {
 				}
 			}
 			/* Create your language table */
-			Locale.getDefault().getLanguage();
 			Cursor res = db.rawQuery("SELECT " + FULLPRODLISTNAME_TABLE_NAME
 					+ "." + PROD_ID + "," + PROD_CARB + "," + PROD_NAME
 					+ " FROM " + FULLPRODLIST_TABLE_NAME + ","
 					+ FULLPRODLISTNAME_TABLE_NAME + " WHERE "
 					+ FULLPRODLIST_TABLE_NAME + "." + PROD_ID + "="
 					+ FULLPRODLISTNAME_TABLE_NAME + "." + PROD_ID + " and "
-					+ PROD_LANG + "='" + Locale.getDefault().getLanguage()
+					+ PROD_LANG + "='" + mActivity.getProdLang()
 					+ "'", null);
 			Log.v(LOGTAG, "count for '" + Locale.getDefault().getLanguage()
 					+ "': " + res.getCount());
@@ -301,6 +376,8 @@ public class ProdList {
 				}
 			;
 			res.close();
+			if (regenerateProductList(db, mActivity.getProdLang()))
+				ok= false;
 			if (ok)
 				db.setTransactionSuccessful();
 		} catch (IOException ex) {
@@ -331,7 +408,10 @@ public class ProdList {
 				+ FULLPRODLIST_TABLE_NAME + ");", null);
 		res.moveToFirst();
 		if (res.getInt(0) == 0)
+		{
+			Log.v(LOGTAG, "Data base is empty => load it");
 			rc = loadInitFile(resources);
+		}
 		res.close();
 		return rc;
 	}
@@ -498,6 +578,11 @@ public class ProdList {
 		}
 		return db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
+	}
+	
+	Cursor getCoursorForLanguages() {
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();		
+		return db.rawQuery("SELECT _rowid_ as _id," + PROD_LANG + " || ' ' || " + PROD_LANGNAME+ " as lang FROM " + LANGLIST_TABLE_NAME + " ORDER BY 2;", null);
 	}
 	
 	double getCarbProc(long id)

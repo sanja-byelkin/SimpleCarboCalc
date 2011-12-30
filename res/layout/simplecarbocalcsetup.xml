@@ -15,7 +15,17 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:entries="@array/UnitChoose" />
+	<TextView
+        android:id="@+id/textView2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/LanguageToShowProducts" />
 
+    <Spinner
+        android:id="@+id/setup_prod_lang"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    
     <TableLayout
         android:id="@+id/tableLayout1"
         android:layout_width="fill_parent"
