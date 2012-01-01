@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Locale;
 
 import android.content.ContentValues;
@@ -45,6 +47,10 @@ public class ProdList {
 	static final String LANGLIST_TABLE_NAME = "langlist";
 
 	private static final ProdList sInstance = new ProdList();
+	
+	private Hashtable<String,String> mLanguages= new Hashtable<String,String>(20);
+	private String mLangListShort[]= null;
+	private String mLangListLong[]= null;
 
 	/**
 	 * Returns the only instance of database management object
@@ -73,7 +79,8 @@ public class ProdList {
 	/**
 	 * empty constructor
 	 */
-	public ProdList() {
+	public ProdList()
+	{
 		mActivity = null;
 		mDbHelper = null;
 	}
@@ -84,9 +91,11 @@ public class ProdList {
 	 * @param activity_arg
 	 *            reference to activity the database connected to
 	 */
-	public void setActivity(SimpleCarboCalcActivity activity_arg) {
+	public void setActivity(SimpleCarboCalcActivity activity_arg)
+	{
 		mActivity = activity_arg;
 		mDbHelper = new ProdListOpenHelper(mActivity);
+		updateLangHash();
 	}
 
 	/**
@@ -96,7 +105,8 @@ public class ProdList {
 	 *            - the line to parse
 	 * @return true in case of error, false if everything is OK
 	 */
-	private boolean parseUnitsLine(String unitParam) {
+	private boolean parseUnitsLine(String unitParam)
+	{
 		int units;
 		try {
 			units = Integer.valueOf(unitParam).intValue();
@@ -121,7 +131,8 @@ public class ProdList {
 	 *            - database to write changes
 	 * @return true in case of error, false if everything is OK
 	 */
-	private boolean parseLangLine(String langLine, SQLiteDatabase db) {
+	private boolean parseLangLine(String langLine, SQLiteDatabase db)
+	{
 		String langsDesc[] = langLine.split("\\|");
 		if (langsDesc.length < 1) {
 			Log.e(LOGTAG, "Unrecognized config lang line (|): '" + langLine
@@ -142,6 +153,7 @@ public class ProdList {
 			vals.put(PROD_LANG, lang[0]);
 			vals.put(PROD_LANGNAME, lang[1]);
 			db.insert(LANGLIST_TABLE_NAME, null, vals);
+		    updateLangHash();
 		}
 		return false;
 	}
@@ -155,7 +167,8 @@ public class ProdList {
 	 *            - database to write changes
 	 * @return true in case of error, false if everything is OK
 	 */
-	private boolean parseProdLine(String prodLine, SQLiteDatabase db) {
+	private boolean parseProdLine(String prodLine, SQLiteDatabase db)
+	{
 		String prodsDesc[] = prodLine.split("\\|");
 		if (prodsDesc.length < 2) {
 			Log.e(LOGTAG, "Unrecognized config prod line (|): '" + prodLine
@@ -214,7 +227,8 @@ public class ProdList {
 	 *            - database to write changes
 	 * @return true in case of error, false if everything is OK
 	 */
-	private boolean parseConfigLine(String line, SQLiteDatabase db) {
+	private boolean parseConfigLine(String line, SQLiteDatabase db)
+	{
 		String[] conf = TextUtils.split(line, "=");
 		if (conf.length != 2) {
 			Log.e(LOGTAG, "Unrecognized config line: '" + line + "'");
@@ -316,7 +330,8 @@ public class ProdList {
 	 *            stream with configuration
 	 * @return true in case of error, false if everything is OK
 	 */
-	synchronized boolean loadBackupFile(boolean merge, InputStream inputStream) {
+	synchronized boolean loadBackupFile(boolean merge, InputStream inputStream)
+	{
 		boolean ok= true;
 		SQLiteDatabase db= mDbHelper.getWritableDatabase();
 		db.beginTransaction();
@@ -394,6 +409,41 @@ public class ProdList {
 		return !ok;
 	}
 
+	
+	synchronized void updateLangHash()
+	{
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		Cursor res = db.query(LANGLIST_TABLE_NAME, new String[] {PROD_LANG, PROD_LANGNAME},
+				null, null, null, null, null);
+		mLanguages.clear();
+		mLangListShort= new String[res.getCount()];
+		mLangListLong= new String[res.getCount()];
+		int i= 0;
+		while(res.moveToNext())
+		{
+			mLangListShort[i]= res.getString(0);
+			mLanguages.put(mLangListShort[i], res.getString(1));
+			i++;
+		}
+		Arrays.sort(mLangListShort);
+		for(i= 0; i < mLangListLong.length; i++)
+			mLangListLong[i]= mLangListShort[i] + " " + mLanguages.get(mLangListShort[i]);
+
+		res.close();
+	}
+	
+	synchronized String getLanguageName(String key)
+	{
+		return mLanguages.get(key);
+	}
+
+	/**
+	 * Returns two lists of languages
+	 * @return array of two lists;
+	 */
+	synchronized String[][] getLangList() { return new String[][] {mLangListShort, mLangListLong}; }
+	
+	
 	/**
 	 * Loads initial configuration file in case if database is empty
 	 * 
@@ -401,7 +451,8 @@ public class ProdList {
 	 *            resources
 	 * @return true in case of error, false if everything is OK
 	 */
-	boolean loadInitFileIfEmpty(Resources resources) {
+	boolean loadInitFileIfEmpty(Resources resources)
+	{
 		boolean rc = false; // OK
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
 		Cursor res = db.rawQuery("select exists(select * from "
@@ -423,13 +474,15 @@ public class ProdList {
 	 *            resources
 	 * @return true in case of error, false if everything is OK
 	 */
-	boolean loadInitFile(Resources resources) {
+	boolean loadInitFile(Resources resources)
+	{
 		InputStream inputStream = resources
 				.openRawResource(R.raw.initial_backup);
 		return loadBackupFile(false, inputStream);
 	}
 
-	void checkExternal() {
+	void checkExternal()
+	{
 		String state = Environment.getExternalStorageState();
 
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -459,7 +512,8 @@ public class ProdList {
 		}
 	}
 
-	void writeUnits(OutputStream out) throws IOException {
+	void writeUnits(OutputStream out) throws IOException
+	{
 		StringBuffer str = new StringBuffer(10);
 		str.append("units=");
 		str.append(mActivity.getUnits());
@@ -467,7 +521,8 @@ public class ProdList {
 		out.write(str.toString().getBytes());
 	}
 
-	void writeLangs(OutputStream out, SQLiteDatabase db) throws IOException {
+	void writeLangs(OutputStream out, SQLiteDatabase db) throws IOException
+	{
 		StringBuffer str = new StringBuffer(100);
 		str.append("lang=");
 		String fields[] = { PROD_LANG, PROD_LANGNAME };
@@ -490,7 +545,8 @@ public class ProdList {
 		out.write(str.toString().getBytes());
 	}
 
-	void writeProds(OutputStream out, SQLiteDatabase db) throws IOException {
+	void writeProds(OutputStream out, SQLiteDatabase db) throws IOException
+	{
 		String fieldsHeader[] = { PROD_ID, PROD_CARB };
 		String fields[] = { PROD_LANG, PROD_NAME };
 

@@ -5,10 +5,10 @@ package com.dnsalias.sanja.simplecarbocalc;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
@@ -25,7 +25,8 @@ public class SimpleCarboCalcSetup extends Activity
 	private Spinner mSetupProdLang;
 	private Button mConfirm;
 	private Button mCancel;
-	private Cursor mLangCursor;
+	private String[] mLangListLong;
+	private String[] mLangListShort;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +40,11 @@ public class SimpleCarboCalcSetup extends Activity
         mConfirm= (Button) findViewById(R.id.setup_confirm);
         mCancel= (Button) findViewById(R.id.setup_cancel);
         
-        mLangCursor= ProdList.getInstance().getCoursorForLanguages();
-        mSetupProdLang.setAdapter(new SimpleCursorAdapter(getBaseContext(),
-        		android.R.layout.simple_spinner_item,
-        		mLangCursor,
-        		new String[] {"lang"},
-        		new int[] {android.R.id.text1, android.R.id.text2}));
+        String[][] lists= ProdList.getInstance().getLangList();
+        mLangListShort= lists[0];
+        mLangListLong= lists[1];
+        
+        mSetupProdLang.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, mLangListLong));
 
         Bundle extras= getIntent().getExtras();
         if (extras != null)
@@ -52,20 +52,19 @@ public class SimpleCarboCalcSetup extends Activity
         	int i;
         	mSetupUnit.setSelection(extras.getInt(SimpleCarboCalcActivity.CONFIG_UNIT));
         	String lang= extras.getString(SimpleCarboCalcActivity.CONFIG_LANG);
-        	for (i= 0; i < mLangCursor.getCount(); i++)
+        	for (i= 0; i < mLangListShort.length; i++)
         	{
-        		mLangCursor.moveToPosition(i);
-        		if (lang.equals(mLangCursor.getString(1).substring(0, 2)))
+        		if (lang.equals(mLangListShort[i]))
         		{
         			Log.v(LOGTAG, "Found " + lang);
         			break;
         		}
-        		Log.v(LOGTAG, "Compare: '" + lang + "' and '" + mLangCursor.getString(1).substring(0, 2) + "'");
+        		Log.v(LOGTAG, "Compare: '" + lang + "' and '" + mLangListShort[i] + "'");
         	}
         	
-        	if (i < mLangCursor.getCount())
+        	if (i < mLangListShort.length)
         	{
-        		Log.v(LOGTAG, "Lang set to: " + i + " " + mLangCursor.getString(1));
+        		Log.v(LOGTAG, "Lang set to: " + i + " " + mLangListShort[i]);
         		mSetupProdLang.setSelection(i);
         	}
         	else
@@ -77,13 +76,11 @@ public class SimpleCarboCalcSetup extends Activity
             	Bundle bundle= new Bundle();
 
                 bundle.putInt(SimpleCarboCalcActivity.CONFIG_UNIT, mSetupUnit.getSelectedItemPosition());
-                mLangCursor.moveToPosition(mSetupProdLang.getSelectedItemPosition());
-                bundle.putString(SimpleCarboCalcActivity.CONFIG_LANG, mLangCursor.getString(1).substring(0, 2));
+               bundle.putString(SimpleCarboCalcActivity.CONFIG_LANG, mLangListShort[mSetupProdLang.getSelectedItemPosition()]);
                 Intent intent = new Intent();
                 intent.putExtras(bundle);
                 Log.v(LOGTAG, "result: " + bundle.toString());
                 setResult(RESULT_OK, intent);
-                mLangCursor.close();
                 finish();
             }
         });

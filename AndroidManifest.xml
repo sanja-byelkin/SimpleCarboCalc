@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name="SimpleCarboCalcSetup"></activity>
+        <activity android:name="ProductEdit"></activity>
     </application>
 
 </manifest>

@@ -5,10 +5,10 @@
     <string name="GrossWeigth">Вес (гр.)</string>
     <string name="CalcField">Вычисл.Поле</string>
     <string name="setup_name">Настройки Простого Калькулятора Углеводов</string>
+    <string name="edit_name">Редактировать продукт</string>
+    <string name="add_name">Добавить продукт</string>
     <string name="CarbUnitsToShow">Единицы для показа количества углеводов</string>
     <string name="LanguageToShowProducts">Язык для показа списка продуктов</string>
-    <string name="OK">OK</string>
-    <string name="Cancel">Отменить</string>
     <string-array name="UnitChoose">
         <item >1гр.</item>
         <item >Хлебная Едненица (ХЕ) 10гр.</item>
