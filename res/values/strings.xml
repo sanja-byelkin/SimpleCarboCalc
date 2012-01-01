@@ -22,9 +22,14 @@
     </string-array>
     <string name="MenuSetup">Setup</string>
     <string name="MenuAbout">About</string>
+    <string name="MenuBackup">Backup</string>
+    <string name="MenuRestoreBackup">Restore Backup</string>
     <string name="About">calculates one of its three parameters by other two.</string>
     <string name="ProductAdd">Add a product</string>
     <string name="ProductEdit">Edit a product</string>
     <string name="Language">Language</string>
     <string name="ProductName">Product name</string>
+    <string name="BackupDoneTo">Backup done to the file \'%s\.</string>
+    <string name="RestoreBackupWarn">Current configuration will be lost."</string>
+    <string name="RemoveProduct">Product \'%s\' will be removed.</string>
 </resources>

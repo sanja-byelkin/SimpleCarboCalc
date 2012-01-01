@@ -21,9 +21,14 @@
     </string-array>
     <string name="MenuSetup">Настройка</string>
     <string name="MenuAbout">О программе</string>
+    <string name="MenuBackup">Резервная копия</string>
+    <string name="MenuRestoreBackup">Восстановить из резервной копии</string>
     <string name="About">вычисляет один из его параметров по двум другим.</string>
     <string name="ProductAdd">Добавить продукт</string>
     <string name="ProductEdit">Редактировать продукт</string>
     <string name="Language">Язык</string>
     <string name="ProductName">Название продукта</string>
+    <string name="BackupDoneTo">Резервная копия сохранена в файл \'%s\'.</string>
+    <string name="RestoreBackupWarn">Текущая конфигурация будет потеряна."</string>
+    <string name="RemoveProduct">Продукт \'%s\' будет удалён.</string>
 </resources>

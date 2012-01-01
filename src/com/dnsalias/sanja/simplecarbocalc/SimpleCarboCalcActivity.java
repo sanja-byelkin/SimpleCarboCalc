@@ -70,7 +70,9 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Menu constants
 	 */
 	private static final int MENU_SETUP = Menu.FIRST + 1;
-	private static final int MENU_ABOUT = MENU_SETUP + 1;
+	private static final int MENU_BACKUP = MENU_SETUP + 1;
+	private static final int MENU_RESTOREBACKUP= MENU_BACKUP + 1;
+	private static final int MENU_ABOUT = MENU_RESTOREBACKUP + 1;
 
 	/**
 	 * Constants to identify configure options
@@ -125,6 +127,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	private ImageButton mMinusButton;
 	private ImageButton mSearchButton;
 	private SimpleCursorAdapter mListAdapter;
+	public SimpleCarboCalcActivity mThis;
 
 	/**
 	 * Finds index of the View object in the given array
@@ -155,6 +158,15 @@ public class SimpleCarboCalcActivity extends Activity {
 			}
 		}
 	};
+	
+	void makeClicked(long id)
+	{
+		double proc = ProdList.getInstance().getCarbProc(id);
+		mText[N_PROC].requestFocus();
+		TextAndDifitsUtils.setDoubleValue(mText[N_PROC], new Double(proc));
+		mLastTouched = id;
+		checkLastTouched();
+	}
 
 	/**
 	 * Listener on product list items click
@@ -163,11 +175,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	{
 		public void onItemClick(AdapterView parent, View view, int position,
 				long id) {
-			double proc = ProdList.getInstance().getCarbProc(id);
-			mText[N_PROC].requestFocus();
-			TextAndDifitsUtils.setDoubleValue(mText[N_PROC], new Double(proc));
-			mLastTouched = id;
-			checkLastTouched();
+			makeClicked(id);
 		}
 	};
 
@@ -184,7 +192,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 	};
 
-	private OnClickListener onAddClickListener= new OnClickListener()
+	private OnClickListener onAddClickListener=	new OnClickListener()
 	{
 		public void onClick (View v)
 		{
@@ -225,6 +233,9 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 	};
 
+	private OnClickListener onRemoveClickListener= null;
+
+	
 	/**
 	 * Fetches and checks percent from its field
 	 * 
@@ -390,9 +401,42 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Called when the activity is first created.
 	 */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		mThis= this;
+		
+		onRemoveClickListener= new OnClickListener()
+		{
+			public void onClick (View v)
+			{
+				if (mLastTouched > 0)
+				{
+					Resources res = getResources();
+					AlertDialog.Builder builder= new AlertDialog.Builder(mThis);
+					builder.setMessage(String.format(res.getString(R.string.RemoveProduct), ProdList.getInstance().getProdName(mLastTouched)))
+					.setCancelable(true)
+					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							ProdList.getInstance().removeProduct(mLastTouched);
+							mLastTouched= -1;
+							checkLastTouched();
+							mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+									null));
+						}
+					})
+					.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+	                			dialog.cancel();
+						}
+					});
+					AlertDialog alert= builder.create();
+					alert.show();
+				}
+			}
+		};
 
 		/*
 		 * Find our fields
@@ -431,6 +475,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				.getLanguage());
 		mPlusButton.setOnClickListener(onAddClickListener);
 		mEditButton.setOnClickListener(onAddClickListener);
+		mMinusButton.setOnClickListener(onRemoveClickListener);
 
 		/*
 		 * Set listeners
@@ -522,6 +567,10 @@ public class SimpleCarboCalcActivity extends Activity {
 			}
 			else if (requestCode == ACTIVITY_EDIT && resultCode == RESULT_OK)
 			{
+				Bundle bundle = intent.getExtras();
+				long id= bundle.getLong(ProductEdit.EDIT_ID);
+				if (id >= 0)
+					makeClicked(id);
 				mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
 						null));
 			}
@@ -565,6 +614,10 @@ public class SimpleCarboCalcActivity extends Activity {
 				android.R.drawable.ic_menu_preferences);
 		menu.add(0, MENU_ABOUT, 0, R.string.MenuAbout).setIcon(
 				android.R.drawable.ic_menu_help);
+		menu.add(0, MENU_BACKUP, 0, R.string.MenuBackup).setIcon(
+				android.R.drawable.ic_menu_save);
+		menu.add(0, MENU_RESTOREBACKUP, 0, R.string.MenuRestoreBackup).setIcon(
+				android.R.drawable.ic_menu_upload);
 		return true;
 	}
 
@@ -572,16 +625,20 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * Menu actions
 	 */
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
 		Intent intent;
 		switch (item.getItemId()) {
 		case MENU_SETUP:
+		{
 			intent = new Intent(this, SimpleCarboCalcSetup.class);
 			intent.putExtra(CONFIG_UNIT, mUnitSetup);
 			intent.putExtra(CONFIG_LANG, mProdLangSetup);
 			startActivityForResult(intent, ACTIVITY_SETUP);
 			return true;
+		}
 		case MENU_ABOUT:
+		{
 			Resources res = getResources();
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(
@@ -597,11 +654,51 @@ public class SimpleCarboCalcActivity extends Activity {
 									dialog.cancel();
 								}
 							});
-			;
 			AlertDialog alert = builder.create();
 			alert.show();
 
 			return true;
+		}
+		case MENU_BACKUP:
+		{
+			Resources res = getResources();
+			String file= ProdList.getInstance().backupConfig();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(String.format(res.getString(R.string.BackupDoneTo),file))
+				.setCancelable(true)
+				.setPositiveButton(android.R.string.ok,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert= builder.create();
+			alert.show();
+			return true;
+		}
+		case MENU_RESTOREBACKUP:
+		{
+			Resources res = getResources();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(res.getString(R.string.RestoreBackupWarn))
+					.setCancelable(true)
+					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				        	   ProdList.getInstance().restoreBackupConfig();
+				        	   mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+										null));
+				           }
+				       })
+				       .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				                dialog.cancel();
+				           }
+				       });
+			AlertDialog alert= builder.create();
+			alert.show();
+			return true;
+		}
 		}
 
 		return super.onOptionsItemSelected(item);

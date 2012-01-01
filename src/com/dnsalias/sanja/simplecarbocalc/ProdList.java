@@ -3,8 +3,10 @@ package com.dnsalias.sanja.simplecarbocalc;
 import static junit.framework.Assert.assertEquals;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -585,22 +587,51 @@ public class ProdList {
 		resHeader.close();
 	}
 
-	boolean backupConfig() {
+	boolean restoreBackupConfig()
+	{
+		boolean res= false;
 		checkExternal();
-		if (!mExternalStorageWriteable)
+		if (!mExternalStorageAvailable)
 			return true;
 		File backup = new File(mExternalMyDirectory, "backup.txt");
-		try {
+		InputStream in= null;
+
+		try
+		{
+			in= new BufferedInputStream(new FileInputStream(backup));
+		}
+		catch (FileNotFoundException ex)
+		{
+			res= true;
+		}
+		if (in != null)
+			res= loadBackupFile(false, in);
+		return res;
+	}
+	
+	/**
+	 * backup configuration into an external storage file 
+	 * @return The file name or null
+	 */
+	String backupConfig()
+	{
+		checkExternal();
+		if (!mExternalStorageWriteable)
+			return null;
+		File backup = new File(mExternalMyDirectory, "backup.txt");
+		try
+		{
 			if (!backup.isFile() && !backup.createNewFile()) {
 				Log.e(LOGTAG, "Can't create file " + backup);
-				return true;
+				return null;
 			}
 		} catch (IOException ex) {
 			Log.e(LOGTAG, "Can't create file '" + backup + "': " + ex);
-			return true;
+			return null;
 		}
 		OutputStream out = null;
-		try {
+		try
+		{
 			out = new BufferedOutputStream(new FileOutputStream(backup));
 			SQLiteDatabase db = mDbHelper.getReadableDatabase();
 			writeUnits(out);
@@ -611,12 +642,12 @@ public class ProdList {
 
 		catch (FileNotFoundException ex) {
 			Log.e(LOGTAG, "Can't find file '" + backup + "': " + ex);
-			return false;
+			return null;
 		}
 
 		catch (IOException ex) {
 			Log.e(LOGTAG, "Can't write file '" + backup + "': " + ex);
-			return false;
+			return null;
 		}
 
 		finally {
@@ -628,7 +659,7 @@ public class ProdList {
 				;
 			}
 		}
-		return false;
+		return backup.toString();
 	}
 
 	Cursor getCoursorForRequest(String req) {
@@ -657,6 +688,19 @@ public class ProdList {
 		res.close();
 		return proc;
 	}
+	
+	String getProdName(long id)
+	{
+		String name;
+		SQLiteDatabase db= mDbHelper.getReadableDatabase();
+		String fields[]= { PROD_NAME };
+		Cursor res= db.query(PRODLIST_TABLE_NAME, fields, PROD__ID + "=" + id,
+				null, null, null, null);
+		res.moveToFirst();
+		name= res.getString(0);
+		res.close();
+		return name;
+	}
 
 	public boolean changeName(SQLiteDatabase db, long id, String lang, String name)
 	{
@@ -680,6 +724,7 @@ public class ProdList {
 		String result= null;
 		SQLiteDatabase db= mDbHelper.getWritableDatabase();
 		db.beginTransaction();
+		Log.v(LOGTAG, "id: " + id + "  proc: " + proc + "  langs: " + Arrays.toString(langs) + "  names: " + Arrays.toString(names));
 		if (id < 0)
 		{
 			// Adding new...
@@ -746,5 +791,27 @@ public class ProdList {
 				Log.v(LOGTAG, "Language '" + lang + "' is not requested");
 		}
 		res.close();
+	}
+	
+	boolean removeProduct(long id)
+	{
+		boolean result= false;
+		SQLiteDatabase db= mDbHelper.getWritableDatabase();
+		if (id > 0)
+		{
+			String val[]= {Long.toString(id)};
+			db.beginTransaction();
+			if (db.delete(FULLPRODLIST_TABLE_NAME, PROD_ID + "=?", val) <= 0)
+				result= true;
+			if (db.delete(FULLPRODLISTNAME_TABLE_NAME, PROD_ID + "=?", val) <= 0)
+				result= true;
+			if (!result)
+			{
+				db.setTransactionSuccessful();
+				regenerateProductList(db, mActivity.getProdLang());
+			}
+			db.endTransaction();
+		}
+		return result;
 	}
 }
