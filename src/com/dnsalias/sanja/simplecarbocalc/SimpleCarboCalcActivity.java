@@ -1,11 +1,10 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 /**
  * 
@@ -120,12 +120,14 @@ public class SimpleCarboCalcActivity extends Activity {
 	 * ID of last touched product in the DB or -1
 	 */
 	private long mLastTouched = -1;
+	private String mLastSearched= null;
 
 	private ListView mProdList;
 	private ImageButton mPlusButton;
 	private ImageButton mEditButton;
 	private ImageButton mMinusButton;
 	private ImageButton mSearchButton;
+	private TextView mCondition;
 	private SimpleCursorAdapter mListAdapter;
 	public SimpleCarboCalcActivity mThis;
 
@@ -234,6 +236,21 @@ public class SimpleCarboCalcActivity extends Activity {
 	};
 
 	private OnClickListener onRemoveClickListener= null;
+	
+	private OnClickListener onSearchClickListener=	new OnClickListener()
+	{
+		public void onClick (View v)
+		{
+			if (mLastTouched < 0 && (mLastSearched == null || mLastSearched.length() == 0))
+				onSearchRequested();
+			else
+			{
+				mLastSearched= null;
+				mLastTouched= -1;
+				checkLastTouched();
+			}
+		}
+	};
 
 	
 	/**
@@ -395,6 +412,20 @@ public class SimpleCarboCalcActivity extends Activity {
 		Log.v(LOGTAG, "mLastTouched: " + mLastTouched);
 		mMinusButton.setEnabled(mLastTouched > 0);
 		mEditButton.setEnabled(mLastTouched > 0);
+		if (mLastTouched > 0)
+		{
+			mCondition.setText(ProdList.getInstance().getProdName(mLastTouched));
+		}
+		else
+		{
+			if (mLastSearched == null || mLastSearched.length() == 0)
+				mCondition.setText("*");
+			else
+				mCondition.setText(mLastSearched);
+		}
+			
+		mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+				mLastSearched, mLastTouched));
 	}
 
 	/**
@@ -423,8 +454,6 @@ public class SimpleCarboCalcActivity extends Activity {
 							ProdList.getInstance().removeProduct(mLastTouched);
 							mLastTouched= -1;
 							checkLastTouched();
-							mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
-									null));
 						}
 					})
 					.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -452,6 +481,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		mEditButton = (ImageButton) findViewById(R.id.edit);
 		mMinusButton = (ImageButton) findViewById(R.id.remove);
 		mSearchButton = (ImageButton) findViewById(R.id.search);
+		mCondition= (TextView) findViewById(R.id.condition);
 
 		/*
 		 * Restore state of the application
@@ -476,6 +506,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		mPlusButton.setOnClickListener(onAddClickListener);
 		mEditButton.setOnClickListener(onAddClickListener);
 		mMinusButton.setOnClickListener(onRemoveClickListener);
+		mSearchButton.setOnClickListener(onSearchClickListener);
 
 		/*
 		 * Set listeners
@@ -498,22 +529,42 @@ public class SimpleCarboCalcActivity extends Activity {
 		 */
 		setCarbUnitsName();
 		setRadio();
-		checkLastTouched();
 		mText[mSequence[0]].requestFocus();
 
 		mListAdapter = new SimpleCursorAdapter(getBaseContext(),
 				android.R.layout.two_line_list_item, ProdList.getInstance()
-						.getCoursorForRequest(null), new String[] {
+						.getCoursorForRequest(mLastSearched, mLastTouched), new String[] {
 						ProdList.PROD_NAME, ProdList.PROD_CARB }, new int[] {
 						android.R.id.text1, android.R.id.text2 });
 		ListView prodList = (ListView) findViewById(R.id.listProd);
 		prodList.setAdapter(mListAdapter);
 		prodList.setOnItemClickListener(mProductListener);
+		checkLastTouched();
 
 		// ProdList.getInstance().loadInitFile(getResources());
 		// ProdList.getInstance().backupConfig();
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+	    setIntent(intent);
+	    if (Intent.ACTION_SEARCH.equals(intent.getAction()))
+	    {
+	        String query= intent.getStringExtra(SearchManager.QUERY);
+	        if (query != null && query.length() != 0)
+	        {
+	        	mLastTouched= -1;
+	        	mLastSearched= query;
+	        	
+	        }
+	        mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+			mLastSearched, mLastTouched));
+	        checkLastTouched();
+	        mProdList.requestFocus();
+	    }
+	}
+	
 	public void setUnits(int new_unit_idx) {
 		if (new_unit_idx != mUnitSetup) {
 			int old_unit = UNIT_FACTOR[mUnitSetup];
@@ -542,8 +593,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		if (new_lang.equals(mProdLangSetup))
 			return; /* nothing changed */
 		mProdLangSetup = ProdList.getInstance().setNewProdLang(new_lang);
-		mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
-				null));
+		checkLastTouched();
 
 		saveAppState();
 	}
@@ -571,8 +621,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				long id= bundle.getLong(ProductEdit.EDIT_ID);
 				if (id >= 0)
 					makeClicked(id);
-				mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
-						null));
+				checkLastTouched();
 			}
 		}
 	}
@@ -686,8 +735,7 @@ public class SimpleCarboCalcActivity extends Activity {
 					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				           public void onClick(DialogInterface dialog, int id) {
 				        	   ProdList.getInstance().restoreBackupConfig();
-				        	   mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
-										null));
+				        	   checkLastTouched();
 				           }
 				       })
 				       .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

@@ -37,6 +37,7 @@ public class ProdList {
 	static final String PROD_CARB = "prod_carb";
 	static final String PROD_LANG = "prod_lang";
 	static final String PROD_NAME = "prod_name";
+	static final String PROD_NAMES = "prod_names"; // for search purposes (sqlite can't search unicode correctly)
 	static final String PROD_LANGNAME = "prod_langname";
 
 	/**
@@ -44,9 +45,9 @@ public class ProdList {
 	 */
 	/* PROD_ID, PROD_CARB */
 	static final String FULLPRODLIST_TABLE_NAME = "fullprodlist";
-	/* PROD_ID, PROD_LANG, PROD_NAME */
+	/* PROD_ID, PROD_LANG, PROD_NAME, PROD_NAMES */
 	static final String FULLPRODLISTNAME_TABLE_NAME = "fullprodlistname";
-	/* PROD__ID, PROD_CARB, PROD_NAME (for current locale) */
+	/* PROD__ID, PROD_CARB, PROD_NAME, PROD_NAMES (for current locale) */
 	static final String PRODLIST_TABLE_NAME = "prodlist";
 	/* PROD_LANG, PROD_LANGNAME */
 	static final String LANGLIST_TABLE_NAME = "langlist";
@@ -219,11 +220,11 @@ public class ProdList {
 						+ "'");
 				return true;
 			}
-			ContentValues vals = new ContentValues(3);
+			ContentValues vals = new ContentValues(4);
 			vals.put(PROD_ID, id);
 			vals.put(PROD_LANG, prod[0]);
 			vals.put(PROD_NAME, prod[1]);
-
+			vals.put(PROD_NAMES, prod[1].toLowerCase());
 			db.insert(FULLPRODLISTNAME_TABLE_NAME, null, vals);
 		}
 		return false;
@@ -320,10 +321,11 @@ public class ProdList {
 						"id: " + res.getLong(0) + "  carb: "
 								+ res.getDouble(1) + " name: '"
 								+ res.getString(2) + "'");
-				ContentValues vals = new ContentValues(3);
+				ContentValues vals = new ContentValues(4);
 				vals.put(PROD__ID, res.getLong(0));
 				vals.put(PROD_CARB, res.getDouble(1));
 				vals.put(PROD_NAME, res.getString(2));
+				vals.put(PROD_NAMES, res.getString(2).toLowerCase());
 				db.replace(PRODLIST_TABLE_NAME, null, vals);
 			}
 		;
@@ -394,10 +396,11 @@ public class ProdList {
 							"id: " + res.getLong(0) + "  carb: "
 									+ res.getDouble(1) + " name: '"
 									+ res.getString(2) + "'");
-					ContentValues vals = new ContentValues(3);
+					ContentValues vals = new ContentValues(4);
 					vals.put(PROD__ID, res.getLong(0));
 					vals.put(PROD_CARB, res.getDouble(1));
 					vals.put(PROD_NAME, res.getString(2));
+					vals.put(PROD_NAMES, res.getString(2).toLowerCase());
 					db.replace(PRODLIST_TABLE_NAME, null, vals);
 				}
 			;
@@ -662,18 +665,28 @@ public class ProdList {
 		return backup.toString();
 	}
 
-	Cursor getCoursorForRequest(String req) {
+	Cursor getCoursorForRequest(String req, long id) {
 		String where= null;
 		String vars[]= null;
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
 		String fields[] = { PROD__ID, PROD_NAME, PROD_CARB };
-		if (req != null) {
-			vars = new String[1];
-			vars[0] = req + "*";
-			where = PROD_NAME + " MATCH ?";
+		if (id < 0)
+		{
+			if (req != null && req.length() != 0)
+			{
+				vars= new String[] { req.toLowerCase() + "*" };
+				where= PROD_NAMES + " MATCH ?";
+			}
 		}
-		return db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
+		else	
+		{
+			where= PROD__ID + "=" + Long.toString(id);
+		}
+		Log.v(LOGTAG, "where: '" + (where == null ? "<NULL>" : where.toString()) + "'   vars: "+ Arrays.toString(vars));
+		Cursor result=  db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
+		Log.v(LOGTAG, "results: " + result.getCount());
+		return result;
 	}
 		
 	double getCarbProc(long id)
@@ -705,10 +718,11 @@ public class ProdList {
 	public boolean changeName(SQLiteDatabase db, long id, String lang, String name)
 	{
 		assertEquals(lang.length(), 2);
-		ContentValues vals= new ContentValues(3);
+		ContentValues vals= new ContentValues(4);
 		vals.put(PROD_ID, id);
 		vals.put(PROD_LANG, lang);
 		vals.put(PROD_NAME, name);
+		vals.put(PROD_NAMES, name.toLowerCase());
 		Log.v(LOGTAG, "try to replace: " + vals.toString());
 		return (db.replace(FULLPRODLISTNAME_TABLE_NAME, null, vals) != -1);
 	}

@@ -17,12 +17,15 @@ public class ProdListOpenHelper extends SQLiteOpenHelper {
             ProdList.PROD_ID + " INTEGER, " +
             ProdList.PROD_LANG + " TEXT(2), " +
             ProdList.PROD_NAME + " TEXT, " +
+            ProdList.PROD_NAMES + " TEXT, " +
             "PRIMARY KEY (" + ProdList.PROD_ID + "," + ProdList.PROD_LANG + ")," +
-            "UNIQUE (" + ProdList.PROD_ID + "," + ProdList.PROD_NAME + ") );";
+            "UNIQUE (" + ProdList.PROD_ID + "," + ProdList.PROD_NAME + ")," +
+            "UNIQUE (" + ProdList.PROD_ID + "," + ProdList.PROD_NAMES + "));";
     static final String PRODLIST_TABLE_CREATE=
             "CREATE VIRTUAL TABLE " + ProdList.PRODLIST_TABLE_NAME + " USING fts3 (" +
             ProdList.PROD__ID + " PRIMARY KEY, " +
             ProdList.PROD_NAME + " TEXT UNIQUE, " +
+            ProdList.PROD_NAMES + " TEXT UNIQUE, " +
             ProdList.PROD_CARB + " REAL);";
     static final String LANGLIST_TABLE_CREATE=
             "CREATE TABLE " + ProdList.LANGLIST_TABLE_NAME + " (" +
