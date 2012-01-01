@@ -1,5 +1,7 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
+import static junit.framework.Assert.assertEquals;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
+
 
 public class ProdList {
 	private static final String LOGTAG = "SimpleCarboCalcActivity.ProdList";
@@ -158,6 +161,20 @@ public class ProdList {
 		return false;
 	}
 
+	Long makeNewProduct(SQLiteDatabase db, double proc)
+	{
+		Long id;
+		ContentValues vals = new ContentValues(2);
+		vals.put(PROD_CARB, proc);
+		vals.putNull(PROD_ID);
+		db.insert(FULLPRODLIST_TABLE_NAME, null, vals);
+		Cursor res = db.rawQuery("SELECT last_insert_rowid()", null);
+		res.moveToFirst();
+		id= res.getLong(0);
+		res.close();
+		return id;
+	}
+	
 	/**
 	 * Parse 'prod' config option parameters
 	 * 
@@ -187,17 +204,9 @@ public class ProdList {
 					+ "'");
 			return true;
 		}
-		{
-			ContentValues vals = new ContentValues(2);
-			vals.put(PROD_CARB, proc);
-			vals.putNull(PROD_ID);
-			db.insert(FULLPRODLIST_TABLE_NAME, null, vals);
-			Cursor res = db.rawQuery("SELECT last_insert_rowid()", null);
-			res.moveToFirst();
-			id = res.getLong(0);
-			Log.v(LOGTAG, "id: " + id + "  '" + prodLine + "'");
-			res.close();
-		}
+		id= makeNewProduct(db, proc);
+		Log.v(LOGTAG, "id: " + id + "  '" + prodLine + "'");
+
 		for (int i = 1; i < prodsDesc.length; i++) {
 			String prod[] = prodsDesc[i].split("\\~");
 			if (prod.length != 2 || prod[0].length() != 2) {
@@ -623,8 +632,8 @@ public class ProdList {
 	}
 
 	Cursor getCoursorForRequest(String req) {
-		String where = null;
-		String vars[] = null;
+		String where= null;
+		String vars[]= null;
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
 		String fields[] = { PROD__ID, PROD_NAME, PROD_CARB };
 		if (req != null) {
@@ -635,22 +644,107 @@ public class ProdList {
 		return db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
 	}
-	
-	Cursor getCoursorForLanguages() {
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();		
-		return db.rawQuery("SELECT _rowid_ as _id," + PROD_LANG + " || ' ' || " + PROD_LANGNAME+ " as lang FROM " + LANGLIST_TABLE_NAME + " ORDER BY 2;", null);
-	}
-	
+		
 	double getCarbProc(long id)
 	{
 		double proc;
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		String fields[] = { PROD_CARB };
+		SQLiteDatabase db= mDbHelper.getReadableDatabase();
+		String fields[]= { PROD_CARB };
 		Cursor res= db.query(FULLPRODLIST_TABLE_NAME, fields, PROD_ID + "=" + id,
 				null, null, null, null);
 		res.moveToFirst();
 		proc= res.getFloat(0);
 		res.close();
 		return proc;
+	}
+
+	public boolean changeName(SQLiteDatabase db, long id, String lang, String name)
+	{
+		assertEquals(lang.length(), 2);
+		ContentValues vals= new ContentValues(3);
+		vals.put(PROD_ID, id);
+		vals.put(PROD_LANG, lang);
+		vals.put(PROD_NAME, name);
+		Log.v(LOGTAG, "try to replace: " + vals.toString());
+		return (db.replace(FULLPRODLISTNAME_TABLE_NAME, null, vals) != -1);
+	}
+	
+	public boolean removeNameIfExists(SQLiteDatabase db, long id, String lang)
+	{
+		db.delete(FULLPRODLISTNAME_TABLE_NAME, PROD_ID + "=? AND " + PROD_LANG + "= ?", new String[] {Long.toString(id), lang});
+		return false;
+	}
+
+	public String editProduct(Long id, Double proc, String[] langs, String[] names)
+	{
+		String result= null;
+		SQLiteDatabase db= mDbHelper.getWritableDatabase();
+		db.beginTransaction();
+		if (id < 0)
+		{
+			// Adding new...
+			id= makeNewProduct(db, proc);
+		}
+		else
+		{
+			// Changing percent
+			ContentValues vals = new ContentValues(1);
+			vals.put(PROD_CARB, proc);
+			if (db.update(FULLPRODLIST_TABLE_NAME, vals, PROD_ID + "=?", new String[] {id.toString()}) == 0)
+			{
+				db.endTransaction(); // abort
+				return "id not found";
+			}
+		}
+		int count= 0;
+		for (int i= 0; i < langs.length; i++)
+		{
+			if (names[i] != null && names[i].length() != 0)
+			{
+				changeName(db, id, langs[i], names[i]);
+				/*
+				if (changeName(db, id, langs[i], names[i]))
+				{
+					db.endTransaction();
+					return "problem of changing/adding name on " + langs[i];
+				}
+				*/
+				count++;
+			}
+			else
+			{
+				if (removeNameIfExists(db, id, langs[i]))
+				{
+					db.endTransaction();
+					return "problem of deleting name on " + langs[i];
+				}
+			}
+		}
+		if (count > 0)
+		{
+			db.setTransactionSuccessful();
+			regenerateProductList(db, mActivity.getProdLang());
+		}
+		else
+			result= "no product names in any language";
+		db.endTransaction(); 		   	   
+		return result;
+	}
+	
+	void getNames(long id, String[] langs, String[] names)
+	{
+		SQLiteDatabase db= mDbHelper.getReadableDatabase();
+		Cursor res= db.query(FULLPRODLISTNAME_TABLE_NAME, new String[] { PROD_LANG, PROD_NAME }, PROD_ID + "=?", new String[] { Long.toString(id) },
+				null, null, null);
+		while(res.moveToNext())
+		{
+			String lang= res.getString(0);
+			int idx= Arrays.binarySearch(langs, lang);
+			if (idx >= 0)
+				names[idx]= res.getString(1);
+			else
+				Log.v(LOGTAG, "Language '" + lang + "' is not requested");
+		}
+		res.close();
 	}
 }

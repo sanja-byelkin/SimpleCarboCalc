@@ -165,7 +165,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				long id) {
 			double proc = ProdList.getInstance().getCarbProc(id);
 			mText[N_PROC].requestFocus();
-			setDoubleValue(mText[N_PROC], new Double(proc));
+			TextAndDifitsUtils.setDoubleValue(mText[N_PROC], new Double(proc));
 			mLastTouched = id;
 			checkLastTouched();
 		}
@@ -191,6 +191,7 @@ public class SimpleCarboCalcActivity extends Activity {
 			long target= mLastTouched;
 			if (target > 0 && v == mPlusButton)
 				target= -1; // adding
+			Log.v(LOGTAG, "Target: " + target);
 			String[][] lists= ProdList.getInstance().getLangList();
 	        String[] langShort= lists[0];
 	        String[] langLong= lists[1];
@@ -204,13 +205,14 @@ public class SimpleCarboCalcActivity extends Activity {
 			if (proc.isNaN())
 				procStr= "";
 			else
-				procStr= getStringDouble(proc);
+				procStr= TextAndDifitsUtils.getStringDouble(proc * 100);
 			intent.putExtra(ProductEdit.EDIT_PROC, procStr);
 
 			if (target > 0)
 			{
 				// Editing
-				String names[]= new String[langShort.length]; // TODO: fix
+				String names[]= new String[langShort.length];
+				ProdList.getInstance().getNames(target, langShort, names);
 				intent.putExtra(ProductEdit.EDIT_NAMES, names);
 			}
 			else
@@ -222,74 +224,6 @@ public class SimpleCarboCalcActivity extends Activity {
 			startActivityForResult(intent, ACTIVITY_EDIT);
 		}
 	};
-	
-	/**
-	 * Checks that given value is positive otherwise turns it to Double.NaN
-	 * 
-	 * @param val
-	 *            - value to check
-	 * @return val or Double.NaN if val was negative
-	 */
-	private Double checkNegative(Double val) {
-		if (val.isNaN() || val < 0)
-			val = Double.NaN;
-		return val;
-	}
-
-	/**
-	 * Fetches numeric value from the given text field and check it
-	 * 
-	 * @param txt
-	 *            - text field to fetch value from
-	 * @return Double - positive numeric value of the field or Double.NaN in
-	 *         case of error
-	 */
-	private Double getPositiveDoubleValue(EditText txt) {
-		Double val;
-		try {
-			val = new Double(txt.getText().toString());
-			val = checkNegative(val);
-		} catch (NumberFormatException ex) {
-			/*
-			 * It could be mess with , and . in different locale setting => try
-			 * to fix
-			 */
-			try {
-				val = new Double(txt.getText().toString().replace(',', '.'));
-				val = checkNegative(val);
-			} catch (NumberFormatException ex2) {
-				val = Double.NaN;
-			}
-		}
-		return val;
-	}
-
-	/**
-	 * Convert double to a string with correct separator and precision
-	 * @param val - double to convert
-	 * @return
-	 */
-	private String getStringDouble(Double val)
-	{
-		DecimalFormatSymbols df = new DecimalFormatSymbols();
-		df.setDecimalSeparator('.'); // Numeric keyboard has only point, so we
-										// should use it
-		DecimalFormat twoDigitsFormat = new DecimalFormat("#.##", df);
-		return twoDigitsFormat.format(val);
-	}
-	
-	/**
-	 * Sets EditText with Double value
-	 * 
-	 * @param txt
-	 *            - where to put the value
-	 * @param val
-	 *            - the value to be put
-	 */
-	private void setDoubleValue(EditText txt, Double val)
-	{
-		txt.setText(getStringDouble(val));
-	}
 
 	/**
 	 * Fetches and checks percent from its field
@@ -298,24 +232,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 *         error
 	 */
 	private Double getProcent() {
-		Double val = getPositiveDoubleValue(mText[N_PROC]);
-		val = checkNegative(val);
-		if (val.isNaN() || val > 100.00)
-			val = Double.NaN;
-		else
-			val /= 100;
-		return val;
-	}
-
-	/**
-	 * Shows value in the fields that indicates inability to calculate it
-	 * 
-	 * @param txt
-	 *            The field where to show error
-	 */
-	private void setToError(EditText txt) {
-		if (txt.getText().toString().compareTo("#") != 0)
-			txt.setText("#");
+		return TextAndDifitsUtils.getProcent(mText[N_PROC]);
 	}
 
 	/**
@@ -331,37 +248,38 @@ public class SimpleCarboCalcActivity extends Activity {
 				return; // Avoid infinite loop or setup problems
 			switch (mSequence[2]) {
 			case N_PROC:
-				total = getPositiveDoubleValue(mText[N_TOTAL]);
-				carb = getPositiveDoubleValue(mText[N_CARB]);
+				total= TextAndDifitsUtils.getPositiveDoubleValue(mText[N_TOTAL]);
+				carb= TextAndDifitsUtils.getPositiveDoubleValue(mText[N_CARB]);
 				if (carb < 0.001 || total.isNaN() || carb.isNaN())
-					setToError(mText[N_PROC]);
+					TextAndDifitsUtils.setToError(mText[N_PROC]);
 				else {
-					carb *= UNIT_FACTOR[mUnitSetup];
-					setDoubleValue(mText[N_PROC],
+					carb*= UNIT_FACTOR[mUnitSetup];
+					TextAndDifitsUtils.setDoubleValue(mText[N_PROC],
 							new Double(carb * 100 / total));
 				}
 				Log.v(LOGTAG, "mTextWatcher afterTextChanged N_PROC:"
 						+ mText[N_PROC].getText().toString());
 				break;
 			case N_TOTAL:
-				proc = getProcent();
-				carb = getPositiveDoubleValue(mText[N_CARB]);
+				proc= getProcent();
+				carb= TextAndDifitsUtils.getPositiveDoubleValue(mText[N_CARB]);
 				if (proc < 0.00001 || proc.isNaN() || carb.isNaN())
-					setToError(mText[N_TOTAL]);
+					TextAndDifitsUtils.setToError(mText[N_TOTAL]);
 				else {
-					carb *= UNIT_FACTOR[mUnitSetup];
-					setDoubleValue(mText[N_TOTAL], new Double(carb / proc));
+					carb*= UNIT_FACTOR[mUnitSetup];
+					TextAndDifitsUtils.setDoubleValue(mText[N_TOTAL], new Double(carb / proc));
 				}
 				Log.v(LOGTAG, "mTextWatcher afterTextChanged N_TOTAL:"
 						+ mText[N_TOTAL].getText().toString());
 				break;
 			case N_CARB:
-				proc = getProcent();
-				total = getPositiveDoubleValue(mText[N_TOTAL]);
+				proc= getProcent();
+				total= TextAndDifitsUtils.getPositiveDoubleValue(mText[N_TOTAL]);
 				if (proc.isNaN() || total.isNaN())
-					setToError(mText[N_CARB]);
+					TextAndDifitsUtils.setToError(mText[N_CARB]);
 				else
-					setDoubleValue(mText[N_CARB], new Double(total * proc
+					TextAndDifitsUtils.setDoubleValue(mText[N_CARB],
+							new Double(total * proc
 							/ UNIT_FACTOR[mUnitSetup]));
 				Log.v(LOGTAG, "mTextWatcher afterTextChanged N_CARB:"
 						+ mText[N_CARB].getText().toString());
@@ -556,11 +474,11 @@ public class SimpleCarboCalcActivity extends Activity {
 			int old_unit = UNIT_FACTOR[mUnitSetup];
 			if (new_unit_idx != -1) {
 				int new_unit = UNIT_FACTOR[new_unit_idx];
-				Double carb = getPositiveDoubleValue(mText[N_CARB]);
+				Double carb = TextAndDifitsUtils.getPositiveDoubleValue(mText[N_CARB]);
 				mUnitSetup = new_unit_idx;
 				if (!carb.isNaN()) {
 					mIsSetupProcess = true;
-					setDoubleValue(mText[N_CARB], new Double((carb * old_unit)
+					TextAndDifitsUtils.setDoubleValue(mText[N_CARB], new Double((carb * old_unit)
 							/ new_unit));
 					mIsSetupProcess = false;
 					Log.v(LOGTAG, "onActivityResult reset N_CARB");
@@ -601,6 +519,11 @@ public class SimpleCarboCalcActivity extends Activity {
 				String new_lang = bundle.getString(CONFIG_LANG);
 				setUnits(new_unit_idx);
 				setProdLang(new_lang);
+			}
+			else if (requestCode == ACTIVITY_EDIT && resultCode == RESULT_OK)
+			{
+				mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+						null));
 			}
 		}
 	}

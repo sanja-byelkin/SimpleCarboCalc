@@ -1,13 +1,17 @@
 package com.dnsalias.sanja.simplecarbocalc;
 
 import android.app.Activity;
+import static junit.framework.Assert.*;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -31,7 +35,9 @@ public class ProductEdit extends Activity
 	private String[] mLangListShort= null;
 	private String[] mNames= null;
 	private String mMainLang= null;
+	private TextView mLastErr;
 	private int mMainLangIdx= -1;
+	private long mId= -1;
 	
 	public static final String EDIT_PROC= "proc_edit";
 	public static final String EDIT_ID= "id_edit";
@@ -48,21 +54,24 @@ public class ProductEdit extends Activity
         setContentView(R.layout.product_edit);
         
         Bundle extras= getIntent().getExtras();
-       	long id= extras.getLong(EDIT_ID);
-       	double proc= extras.getLong(EDIT_PROC);
+       	mId= extras.getLong(EDIT_ID);
+       	String procStr= extras.getString(EDIT_PROC);
        	String names[]= extras.getStringArray(EDIT_NAMES);
        	mLangListShort= extras.getStringArray(EDIT_LANGS_SHORT);
        	mLangListLong= extras.getStringArray(EDIT_LANGS_LONG);
        	mNames= extras.getStringArray(EDIT_NAMES);
        	mMainLang= extras.getString(EDIT_MAIN_LANG);
         
-        setTitle((id > 0 ? R.string.edit_name : R.string.add_name));
+        setTitle((mId > 0 ? R.string.edit_name : R.string.add_name));
 
         
         mProc= (EditText) findViewById(R.id.proc);
         mConfirm= (Button) findViewById(R.id.confirm);
         mCancel= (Button) findViewById(R.id.cancel);
-
+        mLastErr= (TextView) findViewById(R.id.lastError);
+        mProc.setText(procStr);
+        mProc.addTextChangedListener(mTextWatcherValidate);
+        
         TableRow rowExample= (TableRow) findViewById(R.id.tableRow3);
         TableLayout table= (TableLayout) findViewById(R.id.tableLayout1);
 
@@ -95,7 +104,75 @@ public class ProductEdit extends Activity
         }
         if (mMainLangIdx == -1)
         	Log.e(LOGTAG, "Main language '" + mMainLang + "' is not found in " + mLangListShort);
+        else
+        	mNamesEdit[mMainLangIdx].addTextChangedListener(mTextWatcherValidate);
         
+        mCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+
+        });
+        
+        mConfirm.setOnClickListener(new View.OnClickListener() {
+        	
+         	
+            public void onClick(View view) {
+
+            	int count= 0;
+            	for(int i= 0; i < mLangListShort.length; i++)
+            	{
+            		mNames[i]= mNamesEdit[i].getText().toString();
+            		if (mNames[i] != null && mNames[i].length() > 0)
+            			count++;
+            	}
+            	assertTrue(count > 0);
+            	
+            	String error= ProdList.getInstance().editProduct(mId, TextAndDifitsUtils.getProcent(mProc), mLangListShort, mNames);
+
+            	if (error == null || error.length() == 0)
+            	{
+            		Bundle bundle= new Bundle();
+            		bundle.putLong(EDIT_ID, mId);
+            		Intent intent = new Intent();
+            		intent.putExtras(bundle);
+            		Log.v(LOGTAG, "result: " + bundle.toString());
+            		setResult(RESULT_OK, intent);
+            		finish();
+            	}
+            	else
+            	{
+            		mLastErr.setText(error);
+            	}
+            }
+        });
+        
+        validationCheck();
+	}
+	
+	private TextWatcher mTextWatcherValidate = new TextWatcher() {
+		public void afterTextChanged(Editable s) {
+			validationCheck();
+		}
+
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+		}
+	};
+	
+	/**
+	 * Simple and fast validation
+	 */
+	void validationCheck()
+	{
+		Double proc= TextAndDifitsUtils.getProcent(mProc);
+		String name= mNamesEdit[mMainLangIdx].getText().toString();
+		mConfirm.setEnabled(mMainLangIdx != -1 && !proc.isNaN() && name != null && name.length() != 0);
 	}
 
 }

@@ -76,7 +76,7 @@ public class SimpleCarboCalcSetup extends Activity
             	Bundle bundle= new Bundle();
 
                 bundle.putInt(SimpleCarboCalcActivity.CONFIG_UNIT, mSetupUnit.getSelectedItemPosition());
-               bundle.putString(SimpleCarboCalcActivity.CONFIG_LANG, mLangListShort[mSetupProdLang.getSelectedItemPosition()]);
+                bundle.putString(SimpleCarboCalcActivity.CONFIG_LANG, mLangListShort[mSetupProdLang.getSelectedItemPosition()]);
                 Intent intent = new Intent();
                 intent.putExtras(bundle);
                 Log.v(LOGTAG, "result: " + bundle.toString());
