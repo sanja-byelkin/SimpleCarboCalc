@@ -88,20 +88,26 @@
                     android:inputType="numberDecimal" />
             </TableRow>
         </TableLayout>
+		<LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
-        <LinearLayout
-            android:id="@+id/linearLayout1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-  			 <ImageButton
+        	<ImageButton
             	android:id="@+id/add"
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
             	android:src="@drawable/ic_plus" />
+        
+	        <ImageButton
+    	        android:id="@+id/edit"
+        	    android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:src="@drawable/ic_edit" />
 
-        	<ImageButton
-            	android:id="@+id/remove"
-            	android:layout_width="wrap_content"
+	        <ImageButton
+    	        android:id="@+id/remove"
+        	    android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
             	android:src="@drawable/ic_minus" />
 
@@ -110,14 +116,17 @@
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
             	android:src="@drawable/ic_search" />
-        	
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="*"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-        </LinearLayout>
+
+    	</LinearLayout>       
+
+		<TextView
+            android:id="@+id/condition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*"
+            android:textColor="#00FF00"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+        
     </LinearLayout>
 
     <ListView
