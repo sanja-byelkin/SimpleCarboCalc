@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -540,15 +541,12 @@ public class SimpleCarboCalcActivity extends Activity {
 		prodList.setAdapter(mListAdapter);
 		prodList.setOnItemClickListener(mProductListener);
 		checkLastTouched();
-
-		// ProdList.getInstance().loadInitFile(getResources());
-		// ProdList.getInstance().backupConfig();
+		processIntent(getIntent());
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent)
+	
+	private void processIntent(Intent intent)
 	{
-	    setIntent(intent);
 	    if (Intent.ACTION_SEARCH.equals(intent.getAction()))
 	    {
 	        String query= intent.getStringExtra(SearchManager.QUERY);
@@ -563,6 +561,20 @@ public class SimpleCarboCalcActivity extends Activity {
 	        checkLastTouched();
 	        mProdList.requestFocus();
 	    }
+	    if (Intent.ACTION_VIEW.equals(intent.getAction()))
+	    {
+	    	String str= intent.getData().toString().substring(1); // it is reduced Uri "/<number>"
+	    	Log.v(LOGTAG, "VIEW intent: '" + str +"'");
+    		mLastTouched= Long.parseLong(str);
+	    		checkLastTouched();
+	    }
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+	    setIntent(intent);
+	    processIntent(intent);
 	}
 	
 	public void setUnits(int new_unit_idx) {

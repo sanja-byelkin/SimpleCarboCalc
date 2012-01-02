@@ -26,6 +26,8 @@
         </activity>
         <activity android:name="SimpleCarboCalcSetup"></activity>
         <activity android:name="ProductEdit"></activity>
+        <provider android:name=".SimpleCarboCalcSuggestionProvider"
+                  android:authorities="com.dnsalias.sanja.SimpleCarboCalc" />
     </application>
 
 </manifest>

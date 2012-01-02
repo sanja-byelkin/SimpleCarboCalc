@@ -761,13 +761,6 @@ public class ProdList {
 			if (names[i] != null && names[i].length() != 0)
 			{
 				changeName(db, id, langs[i], names[i]);
-				/*
-				if (changeName(db, id, langs[i], names[i]))
-				{
-					db.endTransaction();
-					return "problem of changing/adding name on " + langs[i];
-				}
-				*/
 				count++;
 			}
 			else
