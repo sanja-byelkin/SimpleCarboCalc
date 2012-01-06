@@ -3,9 +3,12 @@ package com.dnsalias.sanja.simplecarbocalc;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class ProdListOpenHelper extends SQLiteOpenHelper {
-	private static final int DATABASE_VERSION= 1;
+	private static final String LOGTAG= "SimpleCarboCalcOpenHelper";
+	
+	private static final int DATABASE_VERSION= 2;
 	private static final String DATABASE_NAME= "ProdList";
 		
     static final String FULLPRODLIST_TABLE_CREATE=
@@ -19,8 +22,8 @@ public class ProdListOpenHelper extends SQLiteOpenHelper {
             ProdList.PROD_NAME + " TEXT, " +
             ProdList.PROD_NAMES + " TEXT, " +
             "PRIMARY KEY (" + ProdList.PROD_ID + "," + ProdList.PROD_LANG + ")," +
-            "UNIQUE (" + ProdList.PROD_ID + "," + ProdList.PROD_NAME + ")," +
-            "UNIQUE (" + ProdList.PROD_ID + "," + ProdList.PROD_NAMES + "));";
+            "UNIQUE (" + ProdList.PROD_LANG + "," + ProdList.PROD_NAME + ")," +
+            "UNIQUE (" + ProdList.PROD_LANG + "," + ProdList.PROD_NAMES + "));";
     static final String PRODLIST_TABLE_CREATE=
             "CREATE VIRTUAL TABLE " + ProdList.PRODLIST_TABLE_NAME + " USING fts3 (" +
             ProdList.PROD__ID + " PRIMARY KEY, " +
@@ -46,9 +49,24 @@ public class ProdListOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		/*
-		 * No new version yet :)
-		 */
+		if (oldVersion == 1)
+		{
+			//Fix keys
+			db.beginTransaction();
+			db.execSQL("CREATE TABLE " + ProdList.FULLPRODLISTNAME_TABLE_NAME + "_tmp (" +
+		            ProdList.PROD_ID + " INTEGER, " +
+		            ProdList.PROD_LANG + " TEXT(2), " +
+		            ProdList.PROD_NAME + " TEXT, " +
+		            ProdList.PROD_NAMES + " TEXT );");
+			db.execSQL("INSERT OR IGNORE INTO " + ProdList.FULLPRODLISTNAME_TABLE_NAME + "_tmp SELECT * FROM " + ProdList.FULLPRODLISTNAME_TABLE_NAME + " ;");
+			db.execSQL("DROP TABLE " + ProdList.FULLPRODLISTNAME_TABLE_NAME  + " ;");
+			db.execSQL(FULLPRODLISTNAME_TABLE_CREATE);
+			db.execSQL("INSERT OR IGNORE INTO " + ProdList.FULLPRODLISTNAME_TABLE_NAME + " SELECT * FROM " + ProdList.FULLPRODLISTNAME_TABLE_NAME + "_tmp ;");
+			db.execSQL("DROP TABLE " + ProdList.FULLPRODLISTNAME_TABLE_NAME  + "_tmp ;");
+			db.setTransactionSuccessful();
+			db.endTransaction();
+			Log.v(LOGTAG, "DB Converted");
+		}
 	}
 
 }
