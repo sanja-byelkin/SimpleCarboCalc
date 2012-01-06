@@ -669,6 +669,7 @@ public class ProdList {
 		String where= null;
 		String vars[]= null;
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		String order_by= PROD_NAMES;
 		String fields[] = { PROD__ID, PROD_NAME, PROD_CARB };
 		if (id < 0)
 		{
@@ -681,10 +682,11 @@ public class ProdList {
 		else	
 		{
 			where= PROD__ID + "=" + Long.toString(id);
+			order_by= null;
 		}
 		Log.v(LOGTAG, "where: '" + (where == null ? "<NULL>" : where.toString()) + "'   vars: "+ Arrays.toString(vars));
 		Cursor result=  db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
-				null);
+				order_by);
 		Log.v(LOGTAG, "results: " + result.getCount());
 		return result;
 	}

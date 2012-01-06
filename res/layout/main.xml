@@ -128,7 +128,9 @@
     <ListView
         android:id="@+id/listProd"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:fastScrollEnabled="true" >
+
     </ListView>
     
 </LinearLayout>

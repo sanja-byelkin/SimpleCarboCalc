@@ -33,6 +33,7 @@ public class SimpleCarboCalcExport extends Activity
 			if (isChecked)
 			{
 				mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+				mExportProds.setFocusable(false);
 			}
 			else
 			{
@@ -41,6 +42,7 @@ public class SimpleCarboCalcExport extends Activity
 						ProdList.getInstance().getCoursorForRequest(null, -1),
 						new String[] {ProdList.PROD_NAME },
 						new int[] { android.R.id.text1 }));
+				mExportProds.setFocusable(true);
 			}
 		}
 	};
