@@ -24,10 +24,11 @@
             <meta-data android:name="android.app.searchable"
                    android:resource="@xml/searchable"/>
         </activity>
-        <activity android:name="SimpleCarboCalcSetup"></activity>
-        <activity android:name="ProductEdit"></activity>
+        <activity android:name=".SimpleCarboCalcSetup"></activity>
+        <activity android:name=".ProductEdit"></activity>
         <provider android:name=".SimpleCarboCalcSuggestionProvider"
                   android:authorities="com.dnsalias.sanja.SimpleCarboCalc" />
+        <activity android:name=".SimpleCarboCalcExport"></activity>
     </application>
 
 </manifest>

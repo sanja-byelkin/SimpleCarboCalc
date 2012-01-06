@@ -7,6 +7,7 @@
     <string name="setup_name">Налаштування Простого Калькулятора Вуглеводів</string>
     <string name="edit_name">Редагувати продукт</string>
     <string name="add_name">Додати продукт</string>
+    <string name="export_name">Tкспорт налаштувань</string>
     <string name="CarbUnitsToShow">Одиниці для показу кількості вуглеводів</string>
     <string name="LanguageToShowProducts">Мова для показу списка продуктів</string>
     <string-array name="UnitChoose">
@@ -22,6 +23,7 @@
     <string name="MenuSetup">Налаштув-ня</string>
     <string name="MenuAbout">О програмі</string>
     <string name="MenuBackup">Резервна копія</string>
+    <string name="MenuExport">Експорт</string>
     <string name="MenuRestoreBackup">Відновити з резервної копії</string>
     <string name="About">вираховує один з йго параметрів згідно двох інших.</string>
     <string name="ProductAdd">Додати продукт</string>
@@ -31,4 +33,8 @@
     <string name="BackupDoneTo">Резервна копія збережена у файл \'%s\.</string>
     <string name="RestoreBackupWarn">Поточна конфігурація буде загублена."</string>
     <string name="RemoveProduct">Продукт \'%s\' буде видален.</string>
+    <string name="File">Файл</string>
+    <string name="Units">Одиниці</string>
+    <string name="Languages">Мови</string>
+    <string name="Products">Продукти</string>
 </resources>

@@ -722,6 +722,10 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		case MENU_BACKUP:
 		{
+			intent = new Intent(this, SimpleCarboCalcExport.class);
+			startActivity(intent);
+			return true;
+			/*
 			Resources res = getResources();
 			String file= ProdList.getInstance().backupConfig();
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -737,6 +741,7 @@ public class SimpleCarboCalcActivity extends Activity {
 			AlertDialog alert= builder.create();
 			alert.show();
 			return true;
+			*/
 		}
 		case MENU_RESTOREBACKUP:
 		{
