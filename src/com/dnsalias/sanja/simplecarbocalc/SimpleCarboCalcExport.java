@@ -2,14 +2,17 @@ package com.dnsalias.sanja.simplecarbocalc;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Date;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioGroup;
+import android.widget.SimpleCursorAdapter;
 
 public class SimpleCarboCalcExport extends Activity
 {
@@ -20,8 +23,29 @@ public class SimpleCarboCalcExport extends Activity
 	CheckBox mUnits;
 	CheckBox mLangs;
 	CheckBox mProds;
+	CheckBox mAllProds;
+	ListView mExportProds;
 	
-    RadioGroup.OnCheckedChangeListener typechangeListener= new RadioGroup.OnCheckedChangeListener()
+	CompoundButton.OnCheckedChangeListener allCangeListener= new CompoundButton.OnCheckedChangeListener()
+	{
+		public void	 onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+		{
+			if (isChecked)
+			{
+				mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+			}
+			else
+			{
+				mExportProds.setAdapter(new SimpleCursorAdapter(getBaseContext(),
+						android.R.layout.simple_list_item_multiple_choice,
+						ProdList.getInstance().getCoursorForRequest(null, -1),
+						new String[] {ProdList.PROD_NAME },
+						new int[] { android.R.id.text1 }));
+			}
+		}
+	};
+
+    RadioGroup.OnCheckedChangeListener typeChangeListener= new RadioGroup.OnCheckedChangeListener()
     {
     	public void onCheckedChanged(RadioGroup group, int checkedId)
         {
@@ -34,6 +58,7 @@ public class SimpleCarboCalcExport extends Activity
         		mUnits.setChecked(true); mUnits.setEnabled(false);
         		mLangs.setChecked(true); mLangs.setEnabled(false);
         		mProds.setChecked(true); mProds.setEnabled(false);
+        		mAllProds.setChecked(true); mAllProds.setEnabled(false);
         	}
         	else
         	{
@@ -47,10 +72,11 @@ public class SimpleCarboCalcExport extends Activity
         		mUnits.setChecked(false); mUnits.setEnabled(true);
         		mLangs.setChecked(false); mLangs.setEnabled(true);
         		mProds.setChecked(true); mProds.setEnabled(true);
+        		mAllProds.setChecked(true); mAllProds.setEnabled(true);
         	}
         }
     };
-    
+
 	@Override
     protected void onCreate(Bundle savedInstanceState)
 	{
@@ -64,9 +90,12 @@ public class SimpleCarboCalcExport extends Activity
         mUnits= (CheckBox) findViewById(R.id.exportUnits);
         mLangs= (CheckBox) findViewById(R.id.exportLanguages);
         mProds= (CheckBox) findViewById(R.id.exportProducts);
+        mAllProds= (CheckBox) findViewById(R.id.allProds);
+        mExportProds= (ListView) findViewById(R.id.exportProdsList);
+        mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
         
- 
-        mType.setOnCheckedChangeListener(typechangeListener);
+        mAllProds.setOnCheckedChangeListener(allCangeListener);
+        mType.setOnCheckedChangeListener(typeChangeListener);
         mType.check(R.id.backup);
 	}
 }

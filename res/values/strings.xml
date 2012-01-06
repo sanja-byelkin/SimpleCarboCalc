@@ -38,4 +38,5 @@
     <string name="Units">Units</string>
     <string name="Languages">Languages</string>
     <string name="Products">Products</string>
+    <string name="AllProducts">All Products</string>
 </resources>

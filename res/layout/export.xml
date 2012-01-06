@@ -63,10 +63,33 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/doExport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/MenuExport" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/doExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/MenuExport" />
+
+        <CheckBox
+            android:id="@+id/allProds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/AllProducts" />
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/exportProdsList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+    </ListView>
 
 </LinearLayout>

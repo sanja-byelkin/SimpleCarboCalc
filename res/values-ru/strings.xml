@@ -37,4 +37,5 @@
     <string name="Units">Единицы</string>
     <string name="Languages">Языки</string>
     <string name="Products">Продукты</string>
+    <string name="AllProducts">Все продукты</string>
 </resources>
