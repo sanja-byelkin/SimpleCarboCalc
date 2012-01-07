@@ -559,33 +559,42 @@ public class ProdList {
 		out.write(str.toString().getBytes());
 	}
 
-	void writeProds(OutputStream out, SQLiteDatabase db) throws IOException
+	void writeProds(OutputStream out, SQLiteDatabase db, long products[]) throws IOException
 	{
+		int current= 0;
 		String fieldsHeader[] = { PROD_ID, PROD_CARB };
 		String fields[] = { PROD_LANG, PROD_NAME };
 
+		if (products != null)
+			Arrays.sort(products);
+		Log.v(LOGTAG, "products: " + (products == null ? "<NULL>" : Arrays.toString(products)));
 		Cursor resHeader = db.query(FULLPRODLIST_TABLE_NAME, fieldsHeader,
-				null, null, null, null, null);
+				null, null, null, null, PROD_ID);
 		if (resHeader.getCount() == 0) {
 			Log.e(LOGTAG, "No Prods in DB");
 		}
 		while (resHeader.moveToNext()) {
-			StringBuffer str = new StringBuffer(100);
-			str.append("prod=");
-			str.append(resHeader.getDouble(1));
-			Cursor res = db.query(FULLPRODLISTNAME_TABLE_NAME, fields, PROD_ID
-					+ "=" + resHeader.getLong(0), null, null, null, null, null);
-			if (res.getCount() == 0) {
-				Log.e(LOGTAG, "No Prod Names in DB :" + resHeader.getLong(0));
+			long prodID= resHeader.getLong(0);
+			while(products != null && current < products.length && prodID > products[current]) current++;
+			if (products == null || (current < products.length && prodID == products[current]))
+			{
+				StringBuffer str = new StringBuffer(100);
+				str.append("prod=");
+				str.append(resHeader.getDouble(1));
+				Cursor res = db.query(FULLPRODLISTNAME_TABLE_NAME, fields, PROD_ID
+						+ "=" + prodID, null, null, null, null, null);
+				if (res.getCount() == 0) {
+					Log.e(LOGTAG, "No Prod Names in DB :" + resHeader.getLong(0));
+				}
+				while (res.moveToNext()) {
+					str.append('|');
+					str.append(res.getString(0));
+					str.append('~');
+					str.append(res.getString(1));
+				}
+				str.append('\n');
+				out.write(str.toString().getBytes());
 			}
-			while (res.moveToNext()) {
-				str.append('|');
-				str.append(res.getString(0));
-				str.append('~');
-				str.append(res.getString(1));
-			}
-			str.append('\n');
-			out.write(str.toString().getBytes());
 		}
 		resHeader.close();
 	}
@@ -614,43 +623,46 @@ public class ProdList {
 	
 	/**
 	 * backup configuration into an external storage file 
-	 * @return The file name or null
+	 * @return false - success, true - error
 	 */
-	String backupConfig()
+	boolean SaveConfig(String file, boolean saveUnits, boolean saveLanguages, boolean saveProducts, long products[])
 	{
 		checkExternal();
 		if (!mExternalStorageWriteable)
-			return null;
-		File backup = new File(mExternalMyDirectory, "backup.txt");
+			return true;
+		File backup = new File(file);
 		try
 		{
 			if (!backup.isFile() && !backup.createNewFile()) {
 				Log.e(LOGTAG, "Can't create file " + backup);
-				return null;
+				return true;
 			}
 		} catch (IOException ex) {
 			Log.e(LOGTAG, "Can't create file '" + backup + "': " + ex);
-			return null;
+			return true;
 		}
 		OutputStream out = null;
 		try
 		{
 			out = new BufferedOutputStream(new FileOutputStream(backup));
 			SQLiteDatabase db = mDbHelper.getReadableDatabase();
-			writeUnits(out);
-			writeLangs(out, db);
-			writeProds(out, db);
+			if (saveUnits)
+				writeUnits(out);
+			if (saveLanguages)
+				writeLangs(out, db);
+			if (saveProducts)
+				writeProds(out, db, products);
 			out.flush();
 		}
 
 		catch (FileNotFoundException ex) {
 			Log.e(LOGTAG, "Can't find file '" + backup + "': " + ex);
-			return null;
+			return true;
 		}
 
 		catch (IOException ex) {
 			Log.e(LOGTAG, "Can't write file '" + backup + "': " + ex);
-			return null;
+			return true;
 		}
 
 		finally {
@@ -662,14 +674,13 @@ public class ProdList {
 				;
 			}
 		}
-		return backup.toString();
+		return false;
 	}
 
 	Cursor getCoursorForRequest(String req, long id) {
 		String where= null;
 		String vars[]= null;
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		String order_by= PROD_NAMES;
 		String fields[] = { PROD__ID, PROD_NAME, PROD_CARB };
 		if (id < 0)
 		{
@@ -682,11 +693,10 @@ public class ProdList {
 		else	
 		{
 			where= PROD__ID + "=" + Long.toString(id);
-			order_by= null;
 		}
 		Log.v(LOGTAG, "where: '" + (where == null ? "<NULL>" : where.toString()) + "'   vars: "+ Arrays.toString(vars));
 		Cursor result=  db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
-				order_by);
+				null);
 		Log.v(LOGTAG, "results: " + result.getCount());
 		return result;
 	}

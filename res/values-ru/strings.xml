@@ -38,4 +38,6 @@
     <string name="Languages">Языки</string>
     <string name="Products">Продукты</string>
     <string name="AllProducts">Все продукты</string>
+    <string name="ExportFailure">Ошибка при экспорте в файл \'%s\'.</string>
+    <string name="ExportSuccess">Файл \'%s\' записан.</string>
 </resources>

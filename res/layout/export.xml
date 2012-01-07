@@ -63,18 +63,16 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/exportResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" " />
+
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/doExport"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:text="@string/MenuExport" />
 
         <CheckBox
             android:id="@+id/allProds"
@@ -84,6 +82,14 @@
             android:layout_centerVertical="true"
             android:text="@string/AllProducts" />
 
+        <Button
+            android:id="@+id/doExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/MenuExport" />
+        
     </RelativeLayout>
 
     <ListView

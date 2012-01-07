@@ -725,23 +725,6 @@ public class SimpleCarboCalcActivity extends Activity {
 			intent = new Intent(this, SimpleCarboCalcExport.class);
 			startActivity(intent);
 			return true;
-			/*
-			Resources res = getResources();
-			String file= ProdList.getInstance().backupConfig();
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(String.format(res.getString(R.string.BackupDoneTo),file))
-				.setCancelable(true)
-				.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.cancel();
-								}
-							});
-			AlertDialog alert= builder.create();
-			alert.show();
-			return true;
-			*/
 		}
 		case MENU_RESTOREBACKUP:
 		{

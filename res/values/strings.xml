@@ -39,4 +39,6 @@
     <string name="Languages">Languages</string>
     <string name="Products">Products</string>
     <string name="AllProducts">All Products</string>
+    <string name="ExportFailure">Failure of export to the file \'%s\'.</string>
+    <string name="ExportSuccess">File \'%s\' is written.</string>
 </resources>

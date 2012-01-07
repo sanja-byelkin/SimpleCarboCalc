@@ -4,15 +4,19 @@ import java.io.File;
 import java.util.Calendar;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 public class SimpleCarboCalcExport extends Activity
 {
@@ -25,12 +29,43 @@ public class SimpleCarboCalcExport extends Activity
 	CheckBox mProds;
 	CheckBox mAllProds;
 	ListView mExportProds;
+	Button mExport;
+	TextView mResult;
+	
+	private void checkExport()
+	{
+		mExport.setEnabled(mUnits.isChecked() ||  mLangs.isChecked() || mProds.isChecked());
+	}
+	
+	CompoundButton.OnCheckedChangeListener prodCangeListener= new CompoundButton.OnCheckedChangeListener()
+	{
+		public void	 onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+		{
+			if (isChecked)
+			{
+				mAllProds.setEnabled(true); mAllProds.setChecked(true);
+			}
+			else
+			{
+				mAllProds.setEnabled(false); mAllProds.setChecked(false);
+			}
+			checkExport();
+		}
+	};
+	
+	CompoundButton.OnCheckedChangeListener checkCangeListener= new CompoundButton.OnCheckedChangeListener()
+	{
+		public void	 onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+		{
+			checkExport();
+		}
+	};
 	
 	CompoundButton.OnCheckedChangeListener allCangeListener= new CompoundButton.OnCheckedChangeListener()
 	{
 		public void	 onCheckedChanged(CompoundButton buttonView, boolean isChecked)
 		{
-			if (isChecked)
+			if (isChecked || !buttonView.isEnabled())
 			{
 				mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
 				mExportProds.setFocusable(false);
@@ -57,9 +92,9 @@ public class SimpleCarboCalcExport extends Activity
         		File file= new File(dir, "backup.txt");
         		mFile.setText(file.toString());
         		mFile.setEnabled(false);
-        		mUnits.setChecked(true); mUnits.setEnabled(false);
-        		mLangs.setChecked(true); mLangs.setEnabled(false);
-        		mProds.setChecked(true); mProds.setEnabled(false);
+        		mUnits.setEnabled(false); mUnits.setChecked(true);
+        		mLangs.setEnabled(false); mLangs.setChecked(true);
+        		mProds.setEnabled(false); mProds.setChecked(true);
         		mAllProds.setChecked(true); mAllProds.setEnabled(false);
         	}
         	else
@@ -71,14 +106,33 @@ public class SimpleCarboCalcExport extends Activity
         				cl.get(Calendar.HOUR), cl.get(Calendar.MINUTE)));
         		mFile.setText(file.toString());
         		mFile.setEnabled(true);
-        		mUnits.setChecked(false); mUnits.setEnabled(true);
-        		mLangs.setChecked(false); mLangs.setEnabled(true);
-        		mProds.setChecked(true); mProds.setEnabled(true);
+        		mUnits.setEnabled(true); mUnits.setChecked(false);
+        		mLangs.setEnabled(true); mLangs.setChecked(false);
+        		mProds.setEnabled(true); mProds.setChecked(true);
         		mAllProds.setChecked(true); mAllProds.setEnabled(true);
         	}
         }
     };
-
+    
+    View.OnClickListener doExportListener= new View.OnClickListener()
+    {
+    	public void onClick(View v)
+    	{
+    		if (ProdList.getInstance().SaveConfig(mFile.getText().toString(),
+    				mUnits.isChecked(), mLangs.isChecked(), mProds.isChecked(),
+    				(mAllProds.isChecked() ? null : mExportProds.getCheckItemIds())))
+    		{
+    			mResult.setText(String.format(getResources().getString(R.string.ExportFailure), mFile.getText().toString()));
+    			mResult.setTextColor(Color.RED);
+    		}
+    		else
+    		{
+    			mResult.setText(String.format(getResources().getString(R.string.ExportSuccess), mFile.getText().toString()));
+    			mResult.setTextColor(Color.GREEN);
+    		}
+    	}
+    };
+    
 	@Override
     protected void onCreate(Bundle savedInstanceState)
 	{
@@ -94,10 +148,16 @@ public class SimpleCarboCalcExport extends Activity
         mProds= (CheckBox) findViewById(R.id.exportProducts);
         mAllProds= (CheckBox) findViewById(R.id.allProds);
         mExportProds= (ListView) findViewById(R.id.exportProdsList);
-        mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+        mExport= (Button) findViewById(R.id.doExport);
+        mResult= (TextView) findViewById(R.id.exportResult);
         
+        mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+        mUnits.setOnCheckedChangeListener(checkCangeListener);
+        mLangs.setOnCheckedChangeListener(checkCangeListener);
+        mProds.setOnCheckedChangeListener(prodCangeListener);
         mAllProds.setOnCheckedChangeListener(allCangeListener);
         mType.setOnCheckedChangeListener(typeChangeListener);
         mType.check(R.id.backup);
+        mExport.setOnClickListener(doExportListener);
 	}
 }
