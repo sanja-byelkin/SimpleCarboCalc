@@ -164,7 +164,10 @@ public class SimpleCarboCalcImport extends Activity
     		}
     		else
     		{
-    			reader= new BufferedReader(new StringReader(mClipboard.getText().toString()));
+    			reader= new BufferedReader(new StringReader(mClipboard.getText().toString().
+    					replaceAll("\\s+prod=", "\nprod=").
+    					replaceAll("\\s+lang=", "\nlang=").
+    					replaceAll("\\s+unit=", "\nunit=")));
     		}
     		if (reader != null)
     		{
