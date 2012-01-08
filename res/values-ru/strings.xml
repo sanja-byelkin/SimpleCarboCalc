@@ -25,6 +25,7 @@
     <string name="MenuAbout">О программе</string>
     <string name="MenuBackup">Резервная копия</string>
     <string name="MenuExport">Экспорт</string>
+    <string name="MenuShare">Послать</string>
     <string name="MenuCheck">Проверка</string>
     <string name="MenuImport">Импорт</string>
     <string name="MenuRestoreBackup">Восстановить из резервной копии</string>
@@ -47,6 +48,7 @@
     <string name="FileImportSource">Источник импорта файла:</string>
     <string name="FileImportInternal">Встроенный</string>
     <string name="FileImportFile">Файл</string>
+    <string name="FileImportClip">Буфер</string>
     <string name="BackupPlacer">-рез.копия-</string>
     <string name="LangLine">Язык :</string>
     <string name="ProdLine">Прод.:</string>

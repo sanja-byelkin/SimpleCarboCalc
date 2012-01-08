@@ -2,8 +2,8 @@ package com.dnsalias.sanja.simplecarbocalc;
 
 import static junit.framework.Assert.assertEquals;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -626,16 +628,16 @@ public class ProdList {
 		}
 	}
 
-	void writeUnits(OutputStream out) throws IOException
+	void writeUnits(Writer out) throws IOException
 	{
 		StringBuffer str = new StringBuffer(10);
 		str.append("units=");
 		str.append(mActivity.getUnits());
 		str.append('\n');
-		out.write(str.toString().getBytes());
+		out.write(str.toString());
 	}
 
-	void writeLangs(OutputStream out, SQLiteDatabase db) throws IOException
+	void writeLangs(Writer out, SQLiteDatabase db) throws IOException
 	{
 		StringBuffer str = new StringBuffer(100);
 		str.append("lang=");
@@ -656,10 +658,10 @@ public class ProdList {
 		}
 		res.close();
 		str.append('\n');
-		out.write(str.toString().getBytes());
+		out.write(str.toString());
 	}
 
-	void writeProds(OutputStream out, SQLiteDatabase db, long products[]) throws IOException
+	void writeProds(Writer out, SQLiteDatabase db, long products[]) throws IOException
 	{
 		int current= 0;
 		String fieldsHeader[] = { PROD_ID, PROD_CARB };
@@ -693,7 +695,7 @@ public class ProdList {
 					str.append(res.getString(1));
 				}
 				str.append('\n');
-				out.write(str.toString().getBytes());
+				out.write(str.toString());
 			}
 		}
 		resHeader.close();
@@ -721,6 +723,44 @@ public class ProdList {
 		return res;
 	}
 	
+	private void WriteConfig(Writer out, boolean saveUnits, boolean saveLanguages, boolean saveProducts, long products[])  throws IOException
+	{
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		if (saveUnits)
+			writeUnits(out);
+		if (saveLanguages)
+			writeLangs(out, db);
+		if (saveProducts)
+			writeProds(out, db, products);
+		out.flush();
+		db.close();
+	}
+	
+	String SaveConfig(boolean saveUnits, boolean saveLanguages, boolean saveProducts, long products[])
+	{
+		StringWriter out= new StringWriter(1000);
+		String result= null;
+		try
+		{
+			WriteConfig(out, saveUnits, saveLanguages, saveProducts, products);
+		}
+		catch (IOException ex) {
+			Log.e(LOGTAG, "Can't write to string: " + ex);
+			return null;
+		}
+		finally {
+			if (out != null) {
+				result= out.toString();
+				try {
+					out.close();
+				} catch (IOException ex) {
+				}
+				;
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * backup configuration into an external storage file 
 	 * @return false - success, true - error
@@ -741,19 +781,11 @@ public class ProdList {
 			Log.e(LOGTAG, "Can't create file '" + backup + "': " + ex);
 			return true;
 		}
-		OutputStream out = null;
+		OutputStreamWriter out= null;
 		try
 		{
-			out = new BufferedOutputStream(new FileOutputStream(backup));
-			SQLiteDatabase db = mDbHelper.getReadableDatabase();
-			if (saveUnits)
-				writeUnits(out);
-			if (saveLanguages)
-				writeLangs(out, db);
-			if (saveProducts)
-				writeProds(out, db, products);
-			out.flush();
-			db.close();
+			out = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(backup)));
+			WriteConfig(out, saveUnits, saveLanguages, saveProducts, products);
 		}
 
 		catch (FileNotFoundException ex) {

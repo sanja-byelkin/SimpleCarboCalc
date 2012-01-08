@@ -7,13 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.ClipboardManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -39,6 +43,7 @@ public class SimpleCarboCalcImport extends Activity
 	RadioButton mRestoreBackup;
 	RadioButton mInternalConf;
 	RadioButton mFileConf;
+	RadioButton mClipConf= null;
 	EditText mFile;
 	CheckBox mAllConfig;
 	ListView mBackupFiles;
@@ -53,7 +58,8 @@ public class SimpleCarboCalcImport extends Activity
 	String mConfigCheckResults[]= mEmptyArray;
 	String mConfigLines[]= null;
 	
-	
+	ClipboardManager mClipboard= null;
+
 	RadioGroup.OnCheckedChangeListener typeChangeListener= new RadioGroup.OnCheckedChangeListener()
     {
     	public void onCheckedChanged(RadioGroup group, int checkedId)
@@ -81,6 +87,7 @@ public class SimpleCarboCalcImport extends Activity
         		mImport.setEnabled(mConfigLines != null);
         	}
         	checkSource();
+        	checkClipAvaliable();
         }
     };
     
@@ -129,28 +136,40 @@ public class SimpleCarboCalcImport extends Activity
     {
     	public void onClick(View v)
     	{
-    		InputStream inputStream= null;
-    		if (mInternalConf.isChecked())
+    		BufferedReader reader= null;
+    		if (!mClipConf.isChecked())
     		{
-    			inputStream= getResources().openRawResource(R.raw.initial_backup);
+    			InputStream inputStream= null;
+    			if (mInternalConf.isChecked())
+    			{
+    				inputStream= getResources().openRawResource(R.raw.initial_backup);
+    				if (inputStream != null)
+    					reader = new BufferedReader(new InputStreamReader(inputStream));
+    			}
+    			else
+    			{
+    				try
+    				{
+    					inputStream= new FileInputStream(mFile.getText().toString());
+    				}
+    				catch (FileNotFoundException ex)
+    				{
+    					Log.e(LOGTAG, "exceprion: " + ex);
+    					mConfigCheckResults= mWarnArray;
+    					mConfigCheckResults[0]= ex.toString();
+    				}
+    			}
+    			if (inputStream != null)
+    				reader= new BufferedReader(new InputStreamReader(inputStream));
     		}
     		else
     		{
-    			try
-    			{
-    				inputStream= new FileInputStream(mFile.getText().toString());
-    			}
-    			catch (FileNotFoundException ex)
-    			{
-    				Log.e(LOGTAG, "exceprion: " + ex);
-    				mConfigCheckResults= mWarnArray;
-    				mConfigCheckResults[0]= ex.toString();
-    			}
+    			reader= new BufferedReader(new StringReader(mClipboard.getText().toString()));
     		}
-    		if (inputStream != null)
+    		if (reader != null)
     		{
-    			checkFile(inputStream);
-    			try { inputStream.close(); } catch (IOException ex) {};
+    			checkFile(reader);
+    			try { reader.close(); } catch (IOException ex) {};
     		}
     		mImportConfig.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_multiple_choice, mConfigCheckResults));
     		mImport.setEnabled(mConfigLines != null);
@@ -172,9 +191,10 @@ public class SimpleCarboCalcImport extends Activity
 			mImportConfig.setChoiceMode(isChecked ? ListView.CHOICE_MODE_NONE : ListView.CHOICE_MODE_MULTIPLE);
 		}
 	};
+
     private void checkSource()
     {
-    	if (mInternalConf.isChecked())
+    	if (!mFileConf.isChecked())
 		{
 			mFile.setEnabled(false);
     		mBackupFiles.setEnabled(false); setEmptyBackupFiles();
@@ -243,11 +263,14 @@ public class SimpleCarboCalcImport extends Activity
         setContentView(R.layout.import_config);
         setTitle(R.string.import_name);
         
+        mClipboard= (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        
         mType= (RadioGroup) findViewById(R.id.radioImportType);
         mSource= (RadioGroup) findViewById(R.id.radioSource);
         mRestoreBackup= (RadioButton) findViewById(R.id.restoreBackup);
         mInternalConf= (RadioButton) findViewById(R.id.importInternalConf);
         mFileConf= (RadioButton) findViewById(R.id.importFileConf);
+        mClipConf= (RadioButton) findViewById(R.id.importClipConf);
         mFile= (EditText) findViewById(R.id.importFile);
         mAllConfig= (CheckBox) findViewById(R.id.allProds);
         mBackupFiles= (ListView) findViewById(R.id.backupFiles);
@@ -258,7 +281,7 @@ public class SimpleCarboCalcImport extends Activity
         mBackupFiles.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_checked, new String[0]));
         mImportConfig.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_checked, mConfigCheckResults));
         
- 
+        checkClipAvaliable();
         mAllConfig.setOnCheckedChangeListener(allCangeListener);
         mBackupFiles.setOnItemClickListener(mBackupListener);
         mSource.setOnCheckedChangeListener(typeSourceListener);
@@ -268,13 +291,17 @@ public class SimpleCarboCalcImport extends Activity
         mImport.setOnClickListener(doImportListener);
 	}
 	
-	void checkFile(InputStream inputStream)
+	void checkClipAvaliable()
+	{
+		if (mClipConf != null)
+			mClipConf.setEnabled(mClipboard.hasText() && !mRestoreBackup.isChecked());
+	}
+	
+	void checkFile(BufferedReader reader)
 	{
 		LinkedList<String> strings= new LinkedList<String>();
 		LinkedList<String> results= new LinkedList<String>();
 		ProdList prods= ProdList.getInstance();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				inputStream));
 
 		try {
 			String line;

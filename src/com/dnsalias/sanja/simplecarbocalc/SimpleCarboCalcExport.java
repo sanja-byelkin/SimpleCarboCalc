@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Calendar;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -97,7 +98,7 @@ public class SimpleCarboCalcExport extends Activity
         		mProds.setEnabled(false); mProds.setChecked(true);
         		mAllProds.setChecked(true); mAllProds.setEnabled(false);
         	}
-        	else
+        	else if (checkedId == R.id.export)
         	{
         		
         		Calendar cl= Calendar.getInstance();
@@ -106,7 +107,16 @@ public class SimpleCarboCalcExport extends Activity
         				cl.get(Calendar.HOUR), cl.get(Calendar.MINUTE)));
         		mFile.setText(file.toString());
         		mFile.setEnabled(true);
-        		mUnits.setEnabled(true); mUnits.setChecked(false);
+        		mUnits.setEnabled(false); mUnits.setChecked(false);
+        		mLangs.setEnabled(true); mLangs.setChecked(false);
+        		mProds.setEnabled(true); mProds.setChecked(true);
+        		mAllProds.setChecked(true); mAllProds.setEnabled(true);
+        	}
+        	else
+        	{
+        		mFile.setText("");
+        		mFile.setEnabled(false);
+        		mUnits.setEnabled(false); mUnits.setChecked(false);
         		mLangs.setEnabled(true); mLangs.setChecked(false);
         		mProds.setEnabled(true); mProds.setChecked(true);
         		mAllProds.setChecked(true); mAllProds.setEnabled(true);
@@ -118,17 +128,37 @@ public class SimpleCarboCalcExport extends Activity
     {
     	public void onClick(View v)
     	{
-    		if (ProdList.getInstance().SaveConfig(mFile.getText().toString(),
-    				mUnits.isChecked(), mLangs.isChecked(), mProds.isChecked(),
-    				(mAllProds.isChecked() ? null : mExportProds.getCheckItemIds())))
+    		if (mType.getCheckedRadioButtonId() == R.id.share)
     		{
-    			mResult.setText(String.format(getResources().getString(R.string.ExportFailure), mFile.getText().toString()));
-    			mResult.setTextColor(Color.RED);
+    			String conf= ProdList.getInstance().SaveConfig(mUnits.isChecked(), mLangs.isChecked(), mProds.isChecked(),
+        				(mAllProds.isChecked() ? null : mExportProds.getCheckItemIds()));
+    			if (conf != null)
+    			{
+    				Intent sendIntent = new Intent(Intent.ACTION_SEND);
+    				sendIntent.putExtra(Intent.EXTRA_TEXT, conf);
+    				sendIntent.setType("text/plain");
+    				startActivity(Intent.createChooser(sendIntent, "Share via"));
+    			}
+    			else
+    			{
+    				mResult.setText(String.format(getResources().getString(R.string.ExportFailure), mFile.getText().toString()));
+    				mResult.setTextColor(Color.RED);
+    			}
     		}
     		else
     		{
-    			mResult.setText(String.format(getResources().getString(R.string.ExportSuccess), mFile.getText().toString()));
-    			mResult.setTextColor(Color.GREEN);
+    			if (ProdList.getInstance().SaveConfig(mFile.getText().toString(),
+    				mUnits.isChecked(), mLangs.isChecked(), mProds.isChecked(),
+    				(mAllProds.isChecked() ? null : mExportProds.getCheckItemIds())))
+    			{
+    				mResult.setText(String.format(getResources().getString(R.string.ExportFailure), mFile.getText().toString()));
+    				mResult.setTextColor(Color.RED);
+    			}
+    			else
+    			{
+    				mResult.setText(String.format(getResources().getString(R.string.ExportSuccess), mFile.getText().toString()));
+    				mResult.setTextColor(Color.GREEN);
+    			}
     		}
     	}
     };

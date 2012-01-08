@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Simple Carbohydrates Calculator</string>
-    <string name="app_ver">2.11</string>
+    <string name="app_ver">2.12</string>
     <string name="CarbProc">% of Carbs</string>
     <string name="GrossWeigth">Weight (gr.)</string>
     <string name="CalcField">Calc.Field</string>
@@ -26,6 +26,7 @@
     <string name="MenuAbout">About</string>
     <string name="MenuBackup">Backup</string>
     <string name="MenuExport">Export</string>
+    <string name="MenuShare">Share</string>
     <string name="MenuCheck">Check</string>
     <string name="MenuImport">Import</string>
     <string name="MenuRestoreBackup">Restore Backup</string>
@@ -48,6 +49,7 @@
     <string name="FileImportSource">File import source:</string>
     <string name="FileImportInternal">Internal</string>
     <string name="FileImportFile">File</string>
+    <string name="FileImportClip">Clipboard</string>
     <string name="BackupPlacer">-backup-</string>
     <string name="LangLine">Lang.:</string>
     <string name="ProdLine">Prod.:</string>
