@@ -84,7 +84,6 @@ public class SimpleCarboCalcSuggestionProvider extends ContentProvider
 		Cursor res= db.query(ProdList.PRODLIST_TABLE_NAME, fields, (query == null ? null : ProdList.PROD_NAMES + " MATCH ?"),
 				(query == null ? null : new String[] { query.toLowerCase() + "*" }),
 				null, null, null);
-		db.close();
 		return res;
 	}
 	

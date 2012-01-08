@@ -799,7 +799,6 @@ public class ProdList {
 		Cursor result=  db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
 		Log.v(LOGTAG, "results: " + result.getCount());
-		db.close();
 		return result;
 	}
 		

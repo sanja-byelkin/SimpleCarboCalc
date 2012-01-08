@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Simple Carbohydrates Calculator</string>
-    <string name="app_ver">2.02</string>
+    <string name="app_ver">2.10</string>
     <string name="CarbProc">% of Carbs</string>
     <string name="GrossWeigth">Weight (gr.)</string>
     <string name="CalcField">Calc.Field</string>
