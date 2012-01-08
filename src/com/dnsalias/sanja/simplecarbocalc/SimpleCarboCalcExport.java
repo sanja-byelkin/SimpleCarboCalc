@@ -67,7 +67,7 @@ public class SimpleCarboCalcExport extends Activity
 		{
 			if (isChecked || !buttonView.isEnabled())
 			{
-				mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+				mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_checked, new String[0]));
 				mExportProds.setFocusable(false);
 			}
 			else
@@ -138,7 +138,7 @@ public class SimpleCarboCalcExport extends Activity
 	{
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.export);
+        setContentView(R.layout.export_config);
         setTitle(R.string.export_name);
         
         mType= (RadioGroup) findViewById(R.id.radioExportType);
@@ -151,7 +151,7 @@ public class SimpleCarboCalcExport extends Activity
         mExport= (Button) findViewById(R.id.doExport);
         mResult= (TextView) findViewById(R.id.exportResult);
         
-        mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, new String[0]));
+        mExportProds.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_checked, new String[0]));
         mUnits.setOnCheckedChangeListener(checkCangeListener);
         mLangs.setOnCheckedChangeListener(checkCangeListener);
         mProds.setOnCheckedChangeListener(prodCangeListener);

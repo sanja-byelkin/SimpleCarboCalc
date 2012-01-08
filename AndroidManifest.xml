@@ -29,6 +29,7 @@
         <provider android:name=".SimpleCarboCalcSuggestionProvider"
                   android:authorities="com.dnsalias.sanja.SimpleCarboCalc" />
         <activity android:name=".SimpleCarboCalcExport"></activity>
+        <activity android:name=".SimpleCarboCalcImport"></activity>
     </application>
 
 </manifest>

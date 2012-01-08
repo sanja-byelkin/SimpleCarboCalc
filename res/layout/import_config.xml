@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RadioGroup
+        android:id="@+id/radioImportType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/importConfig"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/MenuImport" />
+
+        <RadioButton
+            android:id="@+id/restoreBackup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/MenuRestoreBackup" />
+    </RadioGroup>
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/FileImportSource" />
+
+                <RadioGroup
+                    android:id="@+id/radioSource"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <RadioButton
+                        android:id="@+id/importInternalConf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/FileImportInternal" />
+
+                    <RadioButton
+                        android:id="@+id/importFileConf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/FileImportFile" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/backupFiles"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1" >
+            </ListView>
+        </TableRow>
+
+    </TableLayout>
+
+    <EditText
+        android:id="@+id/importFile"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text" >
+
+    </EditText>  
+    <RelativeLayout
+        android:id="@+id/relativeLayoutcommand"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <CheckBox
+            android:id="@+id/allProds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/AllConfig" />
+
+        <Button
+            android:id="@+id/doCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/MenuCheck" />
+
+        <Button
+            android:id="@+id/doImport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="@string/MenuImport" />
+        
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/importConfigList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:choiceMode="multipleChoice"
+        android:fastScrollEnabled="true" >
+
+    </ListView>
+
+</LinearLayout>

@@ -101,7 +101,9 @@ public class ProdList {
 	{
 		mActivity = activity_arg;
 		mDbHelper = new ProdListOpenHelper(mActivity);
-		updateLangHash();
+		SQLiteDatabase db= mDbHelper.getReadableDatabase();
+		updateLangHash(db);
+		db.close();
 	}
 
 	/**
@@ -128,6 +130,32 @@ public class ProdList {
 		return false;
 	}
 
+	String checkLangLine(String langLine)
+	{
+		String langsDesc[] = langLine.split("\\|");
+		if (langsDesc.length < 1) {
+			Log.e(LOGTAG, "Unrecognized config lang line (|): '" + langLine
+					+ "'");
+			return null;
+		}
+		StringBuffer result= new StringBuffer(20);
+		for (int i = 0; i < langsDesc.length; i++) {
+			String lang[] = langsDesc[i].split("\\~");
+			if (lang.length != 2 || lang[0].length() != 2) {
+				Log.e(LOGTAG, "lang.length: " + lang.length
+						+ "  lang[0].length():" + lang[0].length() + "  '"
+						+ langsDesc[i] + "'");
+				Log.e(LOGTAG, "Unrecognized config lang line(~): '" + langLine
+						+ "'");
+				return null;
+			}
+			if (result.length() > 0)
+				result.append(',');
+			result.append(lang[0]);
+		}
+		return result.toString();
+	}
+	
 	/**
 	 * Parse 'lang' config option parameters
 	 * 
@@ -158,9 +186,9 @@ public class ProdList {
 			ContentValues vals = new ContentValues(2);
 			vals.put(PROD_LANG, lang[0]);
 			vals.put(PROD_LANGNAME, lang[1]);
-			db.insert(LANGLIST_TABLE_NAME, null, vals);
-		    updateLangHash();
+			db.replace(LANGLIST_TABLE_NAME, null, vals);
 		}
+	    updateLangHash(db);
 		return false;
 	}
 
@@ -176,6 +204,63 @@ public class ProdList {
 		id= res.getLong(0);
 		res.close();
 		return id;
+	}
+	
+	private long findProduct(SQLiteDatabase db, String prod)
+	{
+		long id= -1;
+		Cursor res= db.query(PRODLIST_TABLE_NAME, new String[] {PROD__ID}, PROD_NAMES + "= ?", new String[] {prod.toLowerCase()}, null, null, null);
+		if (res.moveToNext())
+			id= res.getLong(0);
+		res.close();
+		return id;
+	}
+	
+	private String parseProdInLang(String lang, String[] prodsDesc)
+	{
+		for (int i = 1; i < prodsDesc.length; i++)
+		{
+			String prod[] = prodsDesc[i].split("\\~");
+			if (prod.length != 2 || prod[0].length() != 2)
+				return null;
+			if (lang.equals(prod[0]))
+				return prod[1];
+		}
+		return null;
+	}
+	
+	String checkProdLine(String prodLine)
+	{
+		String prodsDesc[] = prodLine.split("\\|");
+		if (prodsDesc.length < 2) {
+			Log.e(LOGTAG, "Unrecognized config prod line (|): '" + prodLine
+					+ "'");
+			return null;
+		}
+		double proc;
+		try {
+			proc = Double.valueOf(prodsDesc[0]);
+		} catch (NumberFormatException ex2) {
+			proc = -1;
+		}
+		if (proc < 0 && proc > 100) {
+			Log.e(LOGTAG, "Unrecognized config prod line (0): '" + prodLine
+					+ "'");
+			return null;
+		}
+		StringBuffer result= new StringBuffer(100);
+		String lgProd= parseProdInLang(mActivity.getProdLang(), prodsDesc);
+		
+		if (lgProd != null)
+		{
+			SQLiteDatabase db= mDbHelper.getReadableDatabase();
+			result.append(findProduct(db, lgProd) >= 0 ? "# " : "+ ");
+			result.append(lgProd);
+			db.close();
+		}
+		if (result.length() == 0)
+			return null;
+		return result.toString();
 	}
 	
 	/**
@@ -196,7 +281,7 @@ public class ProdList {
 			return true;
 		}
 		double proc;
-		long id;
+		long id= -1;
 		try {
 			proc = Double.valueOf(prodsDesc[0]);
 		} catch (NumberFormatException ex2) {
@@ -207,7 +292,23 @@ public class ProdList {
 					+ "'");
 			return true;
 		}
-		id= makeNewProduct(db, proc);
+		
+		String lgProd= parseProdInLang(mActivity.getProdLang(), prodsDesc);
+		if (lgProd != null)
+		{
+			Log.v(LOGTAG, "Found Product: '" + lgProd + "'");
+			id= findProduct(db, lgProd);
+		}
+		if (id >= 0)
+		{
+			Log.v(LOGTAG, "Found Id: " + id);
+			ContentValues vals = new ContentValues(2);
+			vals.put(PROD_CARB, proc);
+			vals.put(PROD_ID, id);
+			db.replace(FULLPRODLIST_TABLE_NAME, null, vals);
+		}
+		else
+			id= makeNewProduct(db, proc);
 		Log.v(LOGTAG, "id: " + id + "  '" + prodLine + "'");
 
 		for (int i = 1; i < prodsDesc.length; i++) {
@@ -225,7 +326,7 @@ public class ProdList {
 			vals.put(PROD_LANG, prod[0]);
 			vals.put(PROD_NAME, prod[1]);
 			vals.put(PROD_NAMES, prod[1].toLowerCase());
-			db.insert(FULLPRODLISTNAME_TABLE_NAME, null, vals);
+			db.replace(FULLPRODLISTNAME_TABLE_NAME, null, vals);
 		}
 		return false;
 	}
@@ -287,6 +388,7 @@ public class ProdList {
 		if (!regenerateProductList(db, new_lang))
 			db.setTransactionSuccessful();
 		db.endTransaction();
+		db.close();
 		return new_lang;
 	}
 	
@@ -334,6 +436,37 @@ public class ProdList {
 		return !ok;
 	}
 
+	synchronized boolean addConfig(String[] lines)
+	{
+		boolean ok= true;
+		SQLiteDatabase db= mDbHelper.getWritableDatabase();
+		db.beginTransaction();
+
+		for(int i= 0; i < lines.length; i++)
+		{
+			if (lines[i].length() != 0 && lines[i].charAt(0) != '#')
+			{
+				Log.v(LOGTAG, "Line: '" + lines[i] + "'");
+				if (parseConfigLine(lines[i], db)) {
+					Log.e(LOGTAG,
+						"There was errors in parsing backup file. Rollback.");
+					ok = false;
+				}
+			}
+		}
+		if (regenerateProductList(db, mActivity.getProdLang()))
+			ok= false;
+		if (ok)
+			db.setTransactionSuccessful();
+
+		db.endTransaction();
+		db.execSQL("VACUUM;");
+		db.close();
+		mActivity.dbChanged();
+		return !ok;
+	}
+
+	
 	/**
 	 * Loads configuration file.
 	 * 
@@ -343,17 +476,16 @@ public class ProdList {
 	 *            stream with configuration
 	 * @return true in case of error, false if everything is OK
 	 */
-	synchronized boolean loadBackupFile(boolean merge, InputStream inputStream)
+	synchronized boolean loadBackupFile(InputStream inputStream)
 	{
 		boolean ok= true;
 		SQLiteDatabase db= mDbHelper.getWritableDatabase();
 		db.beginTransaction();
-		if (!merge) {
-			// cleanup the database
-			db.execSQL("DELETE FROM " + FULLPRODLIST_TABLE_NAME + ";");
-			db.execSQL("DELETE FROM " + FULLPRODLISTNAME_TABLE_NAME + ";");
-			db.execSQL("DELETE FROM " + LANGLIST_TABLE_NAME + ";");
-		}
+
+		// cleanup the database
+		db.execSQL("DELETE FROM " + FULLPRODLIST_TABLE_NAME + ";");
+		db.execSQL("DELETE FROM " + FULLPRODLISTNAME_TABLE_NAME + ";");
+		db.execSQL("DELETE FROM " + LANGLIST_TABLE_NAME + ";");
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				inputStream));
@@ -363,48 +495,13 @@ public class ProdList {
 			while ((line = reader.readLine()) != null) {
 				Log.v(LOGTAG, "read: '" + line + "'");
 				if (line.length() != 0 && line.charAt(0) != '#') {
-					String[] conf = TextUtils.split(line, "=");
-					if (conf.length != 2) {
-						Log.e(LOGTAG, "Unrecognized config line:'" + line + "'");
-					} else {
-						if (parseConfigLine(line, db)) {
-							Log.e(LOGTAG,
-									"There was errors in parsing backup file. Rollback.");
-							ok = false;
-						}
+					if (parseConfigLine(line, db)) {
+						Log.e(LOGTAG,
+								"There was errors in parsing backup file. Rollback.");
+						ok = false;
 					}
 				}
 			}
-			/* Create your language table */
-			Cursor res = db.rawQuery("SELECT " + FULLPRODLISTNAME_TABLE_NAME
-					+ "." + PROD_ID + "," + PROD_CARB + "," + PROD_NAME
-					+ " FROM " + FULLPRODLIST_TABLE_NAME + ","
-					+ FULLPRODLISTNAME_TABLE_NAME + " WHERE "
-					+ FULLPRODLIST_TABLE_NAME + "." + PROD_ID + "="
-					+ FULLPRODLISTNAME_TABLE_NAME + "." + PROD_ID + " and "
-					+ PROD_LANG + "='" + mActivity.getProdLang()
-					+ "'", null);
-			Log.v(LOGTAG, "count for '" + Locale.getDefault().getLanguage()
-					+ "': " + res.getCount());
-			if (res.getCount() == 0) {
-				Log.e(LOGTAG, "Empty result for languge: '"
-						+ Locale.getDefault().getLanguage() + "'");
-				ok = false;
-			} else
-				while (res.moveToNext()) {
-					Log.v(LOGTAG,
-							"id: " + res.getLong(0) + "  carb: "
-									+ res.getDouble(1) + " name: '"
-									+ res.getString(2) + "'");
-					ContentValues vals = new ContentValues(4);
-					vals.put(PROD__ID, res.getLong(0));
-					vals.put(PROD_CARB, res.getDouble(1));
-					vals.put(PROD_NAME, res.getString(2));
-					vals.put(PROD_NAMES, res.getString(2).toLowerCase());
-					db.replace(PRODLIST_TABLE_NAME, null, vals);
-				}
-			;
-			res.close();
 			if (regenerateProductList(db, mActivity.getProdLang()))
 				ok= false;
 			if (ok)
@@ -417,16 +514,18 @@ public class ProdList {
 				reader.close();
 			} catch (IOException ex) {
 			}
+			Log.v(LOGTAG, "endTransaction");
 			db.endTransaction();
 		}
 		db.execSQL("VACUUM;");
+		db.close();
+		mActivity.dbChanged();
 		return !ok;
 	}
 
 	
-	synchronized void updateLangHash()
+	synchronized void updateLangHash(SQLiteDatabase db)
 	{
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
 		Cursor res = db.query(LANGLIST_TABLE_NAME, new String[] {PROD_LANG, PROD_LANGNAME},
 				null, null, null, null, null);
 		mLanguages.clear();
@@ -478,6 +577,7 @@ public class ProdList {
 			rc = loadInitFile(resources);
 		}
 		res.close();
+		db.close();
 		return rc;
 	}
 
@@ -492,7 +592,7 @@ public class ProdList {
 	{
 		InputStream inputStream = resources
 				.openRawResource(R.raw.initial_backup);
-		return loadBackupFile(false, inputStream);
+		return loadBackupFile(inputStream);
 	}
 
 	void checkExternal()
@@ -617,7 +717,7 @@ public class ProdList {
 			res= true;
 		}
 		if (in != null)
-			res= loadBackupFile(false, in);
+			res= loadBackupFile(in);
 		return res;
 	}
 	
@@ -653,6 +753,7 @@ public class ProdList {
 			if (saveProducts)
 				writeProds(out, db, products);
 			out.flush();
+			db.close();
 		}
 
 		catch (FileNotFoundException ex) {
@@ -680,7 +781,7 @@ public class ProdList {
 	Cursor getCoursorForRequest(String req, long id) {
 		String where= null;
 		String vars[]= null;
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		SQLiteDatabase db= mDbHelper.getReadableDatabase();
 		String fields[] = { PROD__ID, PROD_NAME, PROD_CARB };
 		if (id < 0)
 		{
@@ -698,6 +799,7 @@ public class ProdList {
 		Cursor result=  db.query(PRODLIST_TABLE_NAME, fields, where, vars, null, null,
 				null);
 		Log.v(LOGTAG, "results: " + result.getCount());
+		db.close();
 		return result;
 	}
 		
@@ -711,6 +813,7 @@ public class ProdList {
 		res.moveToFirst();
 		proc= res.getFloat(0);
 		res.close();
+		db.close();
 		return proc;
 	}
 	
@@ -724,6 +827,7 @@ public class ProdList {
 		res.moveToFirst();
 		name= res.getString(0);
 		res.close();
+		db.close();
 		return name;
 	}
 
@@ -761,7 +865,7 @@ public class ProdList {
 			// Changing percent
 			ContentValues vals = new ContentValues(1);
 			vals.put(PROD_CARB, proc);
-			if (db.update(FULLPRODLIST_TABLE_NAME, vals, PROD_ID + "=?", new String[] {id.toString()}) == 0)
+			if (db.update(FULLPRODLIST_TABLE_NAME, vals, PROD_ID + "=" + id, null) == 0)
 			{
 				db.endTransaction(); // abort
 				return "id not found";
@@ -791,7 +895,8 @@ public class ProdList {
 		}
 		else
 			result= "no product names in any language";
-		db.endTransaction(); 		   	   
+		db.endTransaction();
+		db.close();
 		return result;
 	}
 	
@@ -810,14 +915,15 @@ public class ProdList {
 				Log.v(LOGTAG, "Language '" + lang + "' is not requested");
 		}
 		res.close();
+		db.close();
 	}
 	
 	boolean removeProduct(long id)
 	{
 		boolean result= false;
-		SQLiteDatabase db= mDbHelper.getWritableDatabase();
 		if (id > 0)
 		{
+			SQLiteDatabase db= mDbHelper.getWritableDatabase();
 			String val[]= {Long.toString(id)};
 			db.beginTransaction();
 			if (db.delete(FULLPRODLIST_TABLE_NAME, PROD_ID + "=?", val) <= 0)
@@ -830,6 +936,7 @@ public class ProdList {
 				regenerateProductList(db, mActivity.getProdLang());
 			}
 			db.endTransaction();
+			db.close();
 		}
 		return result;
 	}

@@ -8,7 +8,8 @@
     <string name="setup_name">Setup of Simple Carbohydrates Calculator</string>
     <string name="edit_name">Edit the product</string>
     <string name="add_name">Add a product</string>
-    <string name="export_name">Export setup</string>
+    <string name="export_name">Export Configuration</string>
+    <string name="import_name">Import Configuration</string>
     <string name="CarbUnitsToShow">Units to show Carbohydrates amount</string>
     <string name="LanguageToShowProducts">Language to show Products names</string>
     <string-array name="UnitChoose">
@@ -25,6 +26,8 @@
     <string name="MenuAbout">About</string>
     <string name="MenuBackup">Backup</string>
     <string name="MenuExport">Export</string>
+    <string name="MenuCheck">Check</string>
+    <string name="MenuImport">Import</string>
     <string name="MenuRestoreBackup">Restore Backup</string>
     <string name="About">calculates one of its three parameters by other two.</string>
     <string name="ProductAdd">Add a product</string>
@@ -39,6 +42,15 @@
     <string name="Languages">Languages</string>
     <string name="Products">Products</string>
     <string name="AllProducts">All Products</string>
+    <string name="AllConfig">All Lines</string>
     <string name="ExportFailure">Failure of export to the file \'%s\'.</string>
     <string name="ExportSuccess">File \'%s\' is written.</string>
+    <string name="FileImportSource">File import source:</string>
+    <string name="FileImportInternal">Internal</string>
+    <string name="FileImportFile">File</string>
+    <string name="BackupPlacer">-backup-</string>
+    <string name="LangLine">Lang.:</string>
+    <string name="ProdLine">Prod.:</string>
+    <string name="ImportFailure">Import Failure.</string>
+    <string name="ImportSuccess">Import Success.</string>
 </resources>

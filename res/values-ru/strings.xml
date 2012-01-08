@@ -8,6 +8,7 @@
     <string name="edit_name">Редактировать продукт</string>
     <string name="add_name">Добавить продукт</string>
     <string name="export_name">Экспорт настроек</string>
+    <string name="import_name">Импорт настроек</string>
     <string name="CarbUnitsToShow">Единицы для показа количества углеводов</string>
     <string name="LanguageToShowProducts">Язык для показа списка продуктов</string>
     <string-array name="UnitChoose">
@@ -24,6 +25,8 @@
     <string name="MenuAbout">О программе</string>
     <string name="MenuBackup">Резервная копия</string>
     <string name="MenuExport">Экспорт</string>
+    <string name="MenuCheck">Проверка</string>
+    <string name="MenuImport">Импорт</string>
     <string name="MenuRestoreBackup">Восстановить из резервной копии</string>
     <string name="About">вычисляет один из его параметров по двум другим.</string>
     <string name="ProductAdd">Добавить продукт</string>
@@ -38,6 +41,15 @@
     <string name="Languages">Языки</string>
     <string name="Products">Продукты</string>
     <string name="AllProducts">Все продукты</string>
+    <string name="AllConfig">Все строки</string>
     <string name="ExportFailure">Ошибка при экспорте в файл \'%s\'.</string>
     <string name="ExportSuccess">Файл \'%s\' записан.</string>
+    <string name="FileImportSource">Источник импорта файла:</string>
+    <string name="FileImportInternal">Встроенный</string>
+    <string name="FileImportFile">Файл</string>
+    <string name="BackupPlacer">-рез.копия-</string>
+    <string name="LangLine">Язык :</string>
+    <string name="ProdLine">Прод.:</string>
+    <string name="ImportFailure">Импорт неудачен.</string>
+    <string name="ImportSuccess">Импорт успешен.</string>
 </resources>

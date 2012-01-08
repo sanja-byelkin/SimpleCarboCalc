@@ -81,10 +81,12 @@ public class SimpleCarboCalcSuggestionProvider extends ContentProvider
 				ProdList.PROD__ID + " as " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
 		SQLiteDatabase db = mDB.getReadableDatabase();
 		
-		return db.query(ProdList.PRODLIST_TABLE_NAME, fields, (query == null ? null : ProdList.PROD_NAMES + " MATCH ?"),
+		Cursor res= db.query(ProdList.PRODLIST_TABLE_NAME, fields, (query == null ? null : ProdList.PROD_NAMES + " MATCH ?"),
 				(query == null ? null : new String[] { query.toLowerCase() + "*" }),
 				null, null, null);
-	    }
+		db.close();
+		return res;
+	}
 	
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,

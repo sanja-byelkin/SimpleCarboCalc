@@ -409,6 +409,13 @@ public class SimpleCarboCalcActivity extends Activity {
 		mRadioButton[N_CARB].setText(names[mUnitSetup]);
 	}
 
+	void dbChanged()
+	{
+		mLastTouched= -1;
+		mLastSearched= null;
+		checkLastTouched();
+	}
+	
 	void checkLastTouched() {
 		Log.v(LOGTAG, "mLastTouched: " + mLastTouched);
 		mMinusButton.setEnabled(mLastTouched > 0);
@@ -728,23 +735,8 @@ public class SimpleCarboCalcActivity extends Activity {
 		}
 		case MENU_RESTOREBACKUP:
 		{
-			Resources res = getResources();
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(res.getString(R.string.RestoreBackupWarn))
-					.setCancelable(true)
-					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				        	   ProdList.getInstance().restoreBackupConfig();
-				        	   checkLastTouched();
-				           }
-				       })
-				       .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				                dialog.cancel();
-				           }
-				       });
-			AlertDialog alert= builder.create();
-			alert.show();
+			intent = new Intent(this, SimpleCarboCalcImport.class);
+			startActivity(intent);
 			return true;
 		}
 		}
