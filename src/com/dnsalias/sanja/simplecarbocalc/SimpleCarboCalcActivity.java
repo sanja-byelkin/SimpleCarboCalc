@@ -431,8 +431,12 @@ public class SimpleCarboCalcActivity extends Activity {
 			else
 				mCondition.setText(mLastSearched);
 		}
-			
-		mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
+		
+		/*
+		 * mListAdapter can be null on the very first start of the application (initial filling db).
+		 */
+		if (mListAdapter != null)
+			mListAdapter.changeCursor(ProdList.getInstance().getCoursorForRequest(
 				mLastSearched, mLastTouched));
 	}
 
@@ -682,9 +686,9 @@ public class SimpleCarboCalcActivity extends Activity {
 				android.R.drawable.ic_menu_preferences);
 		menu.add(0, MENU_ABOUT, 0, R.string.MenuAbout).setIcon(
 				android.R.drawable.ic_menu_help);
-		menu.add(0, MENU_BACKUP, 0, R.string.MenuBackup).setIcon(
+		menu.add(0, MENU_BACKUP, 0, R.string.MenuExport).setIcon(
 				android.R.drawable.ic_menu_save);
-		menu.add(0, MENU_RESTOREBACKUP, 0, R.string.MenuRestoreBackup).setIcon(
+		menu.add(0, MENU_RESTOREBACKUP, 0, R.string.MenuImport).setIcon(
 				android.R.drawable.ic_menu_upload);
 		return true;
 	}
