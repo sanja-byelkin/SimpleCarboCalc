@@ -15,9 +15,7 @@ public class SimpleCarboCalcSuggestionProvider extends ContentProvider
 	
 	public static String AUTHORITY= "com.dnsalias.sanja.SimpleCarboCalc";
 	public static final Uri CONTENT_URI= Uri.parse("content://" + AUTHORITY + "/products");
-	
-	private ProdListOpenHelper mDB;
-	
+
 	private static final int SEARCH_SUGGEST= 1;
 	private static final UriMatcher sURIMatcher = buildUriMatcher();
 	
@@ -45,7 +43,6 @@ public class SimpleCarboCalcSuggestionProvider extends ContentProvider
 	@Override
 	public boolean onCreate()
 	{
-		mDB= new ProdListOpenHelper(getContext());
 		Log.v(LOGTAG, "inited");
 		return true;
 	}
@@ -75,16 +72,8 @@ public class SimpleCarboCalcSuggestionProvider extends ContentProvider
 	{
 		if (query != null && query.length() == 0)
 			query= null;
-		String[] fields = new String[] {
-				ProdList.PROD__ID,
-				ProdList.PROD_NAME + " as " + SearchManager.SUGGEST_COLUMN_TEXT_1,
-				ProdList.PROD__ID + " as " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
-		SQLiteDatabase db = mDB.getReadableDatabase();
 		
-		Cursor res= db.query(ProdList.PRODLIST_TABLE_NAME, fields, (query == null ? null : ProdList.PROD_NAMES + " MATCH ?"),
-				(query == null ? null : new String[] { query.toLowerCase() + "*" }),
-				null, null, null);
-		return res;
+		return ProdList.getInstance().getCoursorForSuggest(query);
 	}
 	
 	@Override

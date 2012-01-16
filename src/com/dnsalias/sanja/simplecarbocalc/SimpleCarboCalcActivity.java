@@ -470,12 +470,14 @@ public class SimpleCarboCalcActivity extends Activity {
 	private void getPreferences()
 	{
 		SharedPreferences settings= PreferenceManager.getDefaultSharedPreferences(this);
-		mSequence[0] = settings.getInt(STATE_SEQ0, -1);
+		mSequence[0]= settings.getInt(STATE_SEQ0, -1);
+		Log.v(LOGTAG, "Try STATE_SEQ0: " + mSequence[0]);
 		if (mSequence[0] == -1)
 		{
 			// try old preference file 
 			SharedPreferences old_settings= getSharedPreferences(PREFS_NAME, 0);
-			mSequence[0] = settings.getInt(STATE_SEQ0, -1);
+			mSequence[0] = old_settings.getInt(STATE_SEQ0, -1);
+			Log.v(LOGTAG, "Try old STATE_SEQ0: " + mSequence[0]);
 			if (mSequence[0] != -1)
 			{
 				// migrate to the new settings
@@ -606,6 +608,12 @@ public class SimpleCarboCalcActivity extends Activity {
 		processIntent(getIntent());
 	}
 
+    @Override
+    protected void onDestroy()
+    {
+    	ProdList.getInstance().close();
+    	super.onDestroy();
+    }
 	
 	private void processIntent(Intent intent)
 	{
