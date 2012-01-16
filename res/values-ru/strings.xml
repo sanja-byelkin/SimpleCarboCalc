@@ -11,6 +11,9 @@
     <string name="import_name">Импорт настроек</string>
     <string name="CarbUnitsToShow">Единицы для показа количества углеводов</string>
     <string name="LanguageToShowProducts">Язык для показа списка продуктов</string>
+    <string name="LanguageOfApplication">Язык приложения</string>
+    <string name="LanguageOfApplicationSum">(требует ручного перезапуска приложения для вступления в силу)</string>
+    <string name="ExitToChangeLang">Выход для смены языка приложения.</string>
     <string-array name="UnitChoose">
         <item >1гр.</item>
         <item >Хлебная Едненица (ХЕ) 10гр.</item>
@@ -20,6 +23,12 @@
         <item >Углев.,гр</item>
         <item >Углев.,ХЕ10</item>
         <item >Углев.,ХЕ12</item>
+    </string-array>
+    <string-array name="AppLang">
+        <item >По умолчанию</item>
+        <item >en Английский</item>
+        <item >ru Русский</item>
+        <item >uk Украинский</item>
     </string-array>
     <string name="MenuSetup">Настройка</string>
     <string name="MenuAbout">О программе</string>

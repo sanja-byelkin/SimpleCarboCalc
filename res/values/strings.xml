@@ -14,6 +14,9 @@
     <string name="CarbUnitsToShowSum">Units to show Carbohydrates amount</string>
     <string name="LanguageToShowProducts">Product\'s language</string>
     <string name="LanguageToShowProductsSum">Language to show Products names</string>
+    <string name="LanguageOfApplication">Language of application</string>
+    <string name="LanguageOfApplicationSum">(need manual restart to be in force))</string>
+    <string name="ExitToChangeLang">Exit to change application language.</string>
     <string-array name="UnitChoose">
         <item >1gr.</item>
         <item >Unit 10gr.</item>
@@ -28,6 +31,18 @@
         <item >Carb.,gr.</item>
         <item >Carb.,Units(10)</item>
         <item >Carb.,Units(12)</item>
+    </string-array>
+    <string-array name="AppLang">
+        <item >Default</item>
+        <item >en English</item>
+        <item >ru Russian</item>
+        <item >uk Ukrainian</item>
+    </string-array>
+    <string-array name="AppLangVal">
+        <item >default</item>
+        <item >en</item>
+        <item >ru</item>
+        <item >uk</item>
     </string-array>
     <string name="MenuSetup">Setup</string>
     <string name="MenuAbout">About</string>

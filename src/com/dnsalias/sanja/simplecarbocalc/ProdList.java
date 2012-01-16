@@ -109,7 +109,7 @@ public class ProdList {
 		updateLangHash(mDB);
 	}
 	
-	public void close()
+	synchronized public void close()
 	{
 		mDbHelper.close();
 	}

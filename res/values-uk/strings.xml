@@ -11,6 +11,9 @@
     <string name="import_name">Імпорт налаштувань</string>
     <string name="CarbUnitsToShow">Одиниці для показу кількості вуглеводів</string>
     <string name="LanguageToShowProducts">Мова для показу списка продуктів</string>
+    <string name="LanguageOfApplication">Мова програми</string>
+    <string name="LanguageOfApplicationSum">(Потребує ручного перезапуску програми щоб набрати сили)</string>
+    <string name="ExitToChangeLang">Вихід для зміни мови програми.</string>
     <string-array name="UnitChoose">
         <item >1гр.</item>
         <item >Хлібна Одиниця (ХО) 10гр.</item>
@@ -20,6 +23,12 @@
         <item >Вуглев.,гр</item>
         <item >Вуглев.,ХО10</item>
         <item >Вуглев.,ХО12</item>
+    </string-array>
+    <string-array name="AppLang">
+        <item >Згідно умовчань</item>
+        <item >en Англійська</item>
+        <item >ru Русійська</item>
+        <item >uk Українська</item>
     </string-array>
     <string name="MenuSetup">Налаштув-ня</string>
     <string name="MenuAbout">О програмі</string>

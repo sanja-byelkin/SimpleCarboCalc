@@ -2,6 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <ListPreference android:entries="@array/UnitChoose" android:entryValues="@array/UnitValues" android:title="@string/CarbUnitsToShow" android:defaultValue="0" android:key="Unit" android:order="1" android:summary="@string/CarbUnitsToShowSum"/>
     <ListPreference android:title="@string/LanguageToShowProducts" android:key="Lang" android:order="2" android:summary="@string/CarbUnitsToShowSum"/>
+    <ListPreference android:order="3" android:entries="@array/AppLang" android:title="@string/LanguageOfApplication" android:entryValues="@array/AppLangVal" android:summary="@string/LanguageOfApplicationSum" android:key="AppLang"/>
     
 
 </PreferenceScreen>

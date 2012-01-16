@@ -54,6 +54,7 @@ public class SimpleCarboCalcActivity extends Activity {
 	 */
 	public static final String STATE_UNIT= "Unit";
 	public static final String STATE_LANG= "Lang";
+	public static final String STATE_ALANG= "AppLang";
 	public static final String STATE_SEQ0= "Sequence0";
 	public static final String STATE_SEQ1= "Sequence1";
 	public static final String STATE_SEQ2= "Sequence2";
@@ -92,6 +93,7 @@ public class SimpleCarboCalcActivity extends Activity {
 
 	private int mUnitSetup;
 	private String mProdLangSetup;
+	private String mAppLang;
 
 	private boolean mIsSetupProcess= false;
 
@@ -463,8 +465,8 @@ public class SimpleCarboCalcActivity extends Activity {
 				mUnitSetup= 0;
 			}
 		}
-		
 		mProdLangSetup= settings.getString(STATE_LANG, Locale.getDefault().getLanguage());
+		mAppLang= settings.getString(STATE_ALANG, "default");
 	}
 	
 	private void getPreferences()
@@ -696,8 +698,35 @@ public class SimpleCarboCalcActivity extends Activity {
 			}
 			String new_lang= settings.getString(STATE_LANG, Locale.getDefault().getLanguage());
 			Log.v(LOGTAG, "new_unit_idx: " + new_unit_idx + "  new_lang: " + new_lang);
+			String newAppLang= settings.getString(STATE_ALANG, "default");
+			boolean appLangChanged= !newAppLang.equals(mAppLang);
+			Log.v(LOGTAG, "newAppLang: '" + newAppLang + "'  oldAppLang: '" + mAppLang + "'");
+			Log.v(LOGTAG, "appLangChanged: " + appLangChanged);
+			mAppLang= newAppLang; // could be saved before we will do it explicitly;
 			setUnits(new_unit_idx);
 			setProdLang(new_lang);
+			if (appLangChanged)
+			{
+				saveAppState();
+				ProdList.getInstance().close();
+				Resources res = getResources();
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(
+						String.format(res.getString(R.string.ExitToChangeLang)))
+						.setCancelable(false)
+						.setPositiveButton(android.R.string.ok,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										dialog.cancel();
+										// Application language changed => exit
+										System.runFinalizersOnExit(true);
+										System.exit(0);
+									}
+								});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
 		}
 		if (intent != null && requestCode == ACTIVITY_EDIT && resultCode == RESULT_OK)
 		{
@@ -724,6 +753,7 @@ public class SimpleCarboCalcActivity extends Activity {
 		editor.putString(STATE_CARB, mText[N_CARB].getText().toString());
 		editor.putString(STATE_UNIT, String.valueOf(mUnitSetup));
 		editor.putString(STATE_LANG, mProdLangSetup);
+		editor.putString(STATE_ALANG, mAppLang);
 		editor.commit();
 		Log.v(LOGTAG, "saveAppState done");
 	}
@@ -763,11 +793,6 @@ public class SimpleCarboCalcActivity extends Activity {
 		switch (item.getItemId()) {
 		case MENU_SETUP:
 		{
-			/*intent = new Intent(this, SimpleCarboCalcSetup.class);
-			intent.putExtra(CONFIG_UNIT, mUnitSetup);
-			intent.putExtra(CONFIG_LANG, mProdLangSetup);
-			startActivityForResult(intent, ACTIVITY_SETUP);
-			*/
 			startActivityForResult(new Intent(this, SimpleCarboCalcPreference.class), ACTIVITY_SETUP);
 			return true;
 		}
