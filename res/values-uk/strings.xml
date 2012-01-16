@@ -9,8 +9,10 @@
     <string name="add_name">Додати продукт</string>
     <string name="export_name">Tкспорт налаштувань</string>
     <string name="import_name">Імпорт налаштувань</string>
-    <string name="CarbUnitsToShow">Одиниці для показу кількості вуглеводів</string>
-    <string name="LanguageToShowProducts">Мова для показу списка продуктів</string>
+    <string name="CarbUnitsToShow">Одиниці сті вуглеводів</string>
+    <string name="CarbUnitsToShowSum">Одиниці для показу кількості вуглеводів</string>
+    <string name="LanguageToShowProducts">Мова продуктів</string>
+    <string name="LanguageToShowProductsSum">Мова для показу списка продуктів</string>
     <string name="LanguageOfApplication">Мова програми</string>
     <string name="LanguageOfApplicationSum">(Потребує ручного перезапуску програми щоб набрати сили)</string>
     <string name="ExitToChangeLang">Вихід для зміни мови програми.</string>

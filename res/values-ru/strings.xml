@@ -9,8 +9,10 @@
     <string name="add_name">Добавить продукт</string>
     <string name="export_name">Экспорт настроек</string>
     <string name="import_name">Импорт настроек</string>
-    <string name="CarbUnitsToShow">Единицы для показа количества углеводов</string>
-    <string name="LanguageToShowProducts">Язык для показа списка продуктов</string>
+    <string name="CarbUnitsToShow">Единицы углеводов</string>
+    <string name="CarbUnitsToShowSum">Единицы для показа количества углеводов</string>
+    <string name="LanguageToShowProducts">Язык продуктов</string>
+    <string name="LanguageToShowProductsSum">Язык для показа списка продуктов</string>
     <string name="LanguageOfApplication">Язык приложения</string>
     <string name="LanguageOfApplicationSum">(требует ручного перезапуска приложения для вступления в силу)</string>
     <string name="ExitToChangeLang">Выход для смены языка приложения.</string>
