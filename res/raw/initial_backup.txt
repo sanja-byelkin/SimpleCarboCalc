@@ -2,7 +2,7 @@
 # file consists of pairs keyword=value everything else ignored
 
 #Units (0 - grams, 1 - unit 10gr. 2 - unit 12gr)
-units=2
+units=0
 
 #Available languages
 lang=ru~Русский|uk~Українська|en~English

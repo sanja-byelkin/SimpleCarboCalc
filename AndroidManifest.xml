@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dnsalias.sanja.simplecarbocalc"
-    android:versionCode="16"
+    android:versionCode="17"
     android:versionName="@string/app_ver" >
 
     <uses-sdk android:minSdkVersion="4" />
@@ -30,6 +30,7 @@
                   android:authorities="com.dnsalias.sanja.SimpleCarboCalc" />
         <activity android:name=".SimpleCarboCalcExport"></activity>
         <activity android:name=".SimpleCarboCalcImport"></activity>
+        <activity android:name=".SimpleCarboCalcPreference"></activity>
     </application>
 
 </manifest>

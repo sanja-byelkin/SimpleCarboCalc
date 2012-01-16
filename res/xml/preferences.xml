@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <ListPreference android:entries="@array/UnitChoose" android:entryValues="@array/UnitValues" android:title="@string/CarbUnitsToShow" android:defaultValue="0" android:key="Unit" android:order="1" android:summary="@string/CarbUnitsToShowSum"/>
+    <ListPreference android:title="@string/LanguageToShowProducts" android:key="Lang" android:order="2" android:summary="@string/CarbUnitsToShowSum"/>
+    
+
+</PreferenceScreen>

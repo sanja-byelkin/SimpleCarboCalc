@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Simple Carbohydrates Calculator</string>
-    <string name="app_ver">2.12</string>
+    <string name="app_ver">2.13</string>
     <string name="CarbProc">% of Carbs</string>
     <string name="GrossWeigth">Weight (gr.)</string>
     <string name="CalcField">Calc.Field</string>
@@ -10,12 +10,19 @@
     <string name="add_name">Add a product</string>
     <string name="export_name">Export Configuration</string>
     <string name="import_name">Import Configuration</string>
-    <string name="CarbUnitsToShow">Units to show Carbohydrates amount</string>
-    <string name="LanguageToShowProducts">Language to show Products names</string>
+    <string name="CarbUnitsToShow">Carbohydrates units</string>
+    <string name="CarbUnitsToShowSum">Units to show Carbohydrates amount</string>
+    <string name="LanguageToShowProducts">Product\'s language</string>
+    <string name="LanguageToShowProductsSum">Language to show Products names</string>
     <string-array name="UnitChoose">
         <item >1gr.</item>
         <item >Unit 10gr.</item>
         <item >Unit 12gr.</item>
+    </string-array>
+    <string-array name="UnitValues">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
     </string-array>
     <string-array name="UnitName">
         <item >Carb.,gr.</item>
