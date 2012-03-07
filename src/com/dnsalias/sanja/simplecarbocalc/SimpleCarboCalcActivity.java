@@ -447,6 +447,19 @@ public class SimpleCarboCalcActivity extends Activity {
 				mLastSearched, mLastTouched));
 	}
 	
+	/**
+	 * Get valid language for initial setup
+	 * @param lang proposed language
+	 * @return valid language
+	 */
+	
+	private String getDefaultValidLanguege(String lang)
+	{
+		if (!lang.equals("en") && !lang.equals("ru") && !lang.equals("uk"))
+			return "en";
+		return lang;
+	}
+	
 	private void getPreferences(SharedPreferences settings, boolean old)
 	{
 		mSequence[0] = settings.getInt(STATE_SEQ0, 0);
@@ -465,7 +478,7 @@ public class SimpleCarboCalcActivity extends Activity {
 				mUnitSetup= 0;
 			}
 		}
-		mProdLangSetup= settings.getString(STATE_LANG, Locale.getDefault().getLanguage());
+		mProdLangSetup= settings.getString(STATE_LANG, getDefaultValidLanguege(Locale.getDefault().getLanguage()));
 		mAppLang= settings.getString(STATE_ALANG, "default");
 	}
 	

@@ -167,7 +167,7 @@ public class ProductEdit extends Activity {
 	 */
 	void validationCheck() {
 		Double proc = TextAndDifitsUtils.getProcent(mProc);
-		String name = mNamesEdit[mMainLangIdx].getText().toString();
+		String name = ((mMainLangIdx > 0) ? mNamesEdit[mMainLangIdx].getText().toString() : null);
 		mConfirm.setEnabled(mMainLangIdx != -1 && !proc.isNaN() && name != null
 				&& name.length() != 0);
 	}
